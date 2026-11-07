@@ -15,7 +15,7 @@ A livestream character that kneads slime and replies to comments out loud, **wit
 **1. Give the repo to Claude Code.** Open Claude Code and type:
 
 ```
-https://github.com/UgurKeskekci/kodla-yayinci set this up
+https://github.com/UgurKeskekci/kodla-tiktok-yayinci set this up
 ```
 
 Claude clones the repo, checks dependencies, starts the server, and opens the menu in your browser.
@@ -29,8 +29,8 @@ Claude clones the repo, checks dependencies, starts the server, and opens the me
 Requirements: [Node.js](https://nodejs.org) 20 or higher, Chrome or Edge.
 
 ```bash
-git clone https://github.com/UgurKeskekci/kodla-yayinci
-cd kodla-yayinci
+git clone https://github.com/UgurKeskekci/kodla-tiktok-yayinci
+cd kodla-tiktok-yayinci
 npm install
 npm start
 ```
