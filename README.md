@@ -13,7 +13,7 @@ yapabilir, ücretsiz seslerle konuşturabilir, isterseniz TikTok canlı yayını
 **1. Repoyu Claude Code'a verin.** Claude Code'u açın ve şunu yazın:
 
 ```
-https://github.com/UgurKeskekci/kodla-yayinci bu sistemi kur
+https://github.com/UgurKeskekci/kodla-tiktok-yayinci bu sistemi kur
 ```
 
 Claude repoyu indirir, gerekenleri kontrol eder, sunucuyu açar ve menüyü tarayıcıda gösterir.
@@ -29,8 +29,8 @@ ver", "arka plana pencere çiz". Hangi saniyede, ne yanlış, ne korunacak: üç
 Gerekenler: [Node.js](https://nodejs.org) 20 ya da üstü, Chrome ya da Edge.
 
 ```bash
-git clone https://github.com/UgurKeskekci/kodla-yayinci
-cd kodla-yayinci
+git clone https://github.com/UgurKeskekci/kodla-tiktok-yayinci
+cd kodla-tiktok-yayinci
 npm install
 npm start
 ```

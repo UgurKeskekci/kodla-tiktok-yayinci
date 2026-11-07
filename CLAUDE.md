@@ -5,7 +5,7 @@ Her karesi Canvas koduyla çizilen yayın karakteri. Görsel veya video üretim 
 
 ## Kullanıcı "bu sistemi kur" derse
 
-1. Repo yoksa klonla: `git clone https://github.com/UgurKeskekci/kodla-yayinci && cd kodla-yayinci`.
+1. Repo yoksa klonla: `git clone https://github.com/UgurKeskekci/kodla-tiktok-yayinci && cd kodla-tiktok-yayinci`.
 2. Node 20+ var mı bak (`node -v`). Yoksa kullanıcıya https://nodejs.org adresini ver, kurmasını iste.
 3. `npm install`, sonra `npm start` (arka planda). "sahne http://127.0.0.1:5320/" satırını bekle.
 4. Menüyü tarayıcıda aç: http://127.0.0.1:5320/menu.html. Kullanıcıya hazır karakterlerden birini seçmesini,
