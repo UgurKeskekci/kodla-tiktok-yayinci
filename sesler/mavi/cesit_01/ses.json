@@ -1,0 +1,17 @@
+{
+  "ad": "mavi",
+  "gorunen_ad": "mavi",
+  "cesit": 1,
+  "dil": "tr",
+  "ses_yaratici_ingilizce_prompt": "Adult woman in her late twenties, witty and friendly radio presenter, light feminine voice, articulate and clear, relaxed smile",
+  "ses_yaratilirken_okutulan_metin": "Benim sesim de ücretsiz, tamamen yerel bir model.",
+  "tasarim_tohumu": 1439919708,
+  "okuma_tohumu": 1439919708,
+  "referans": "referans.wav",
+  "referans_sn": 3.2,
+  "model": "voxcpm2-q8_0.gguf",
+  "adim": 16,
+  "cfg": 2.0,
+  "yapay": true,
+  "tarih": "2026-11-07 23:27"
+}

@@ -1,0 +1,17 @@
+{
+  "ad": "gece",
+  "gorunen_ad": "gece",
+  "cesit": 3,
+  "dil": "tr",
+  "ses_yaratici_ingilizce_prompt": "Adult woman in her mid twenties, energetic and cheerful TV host, bright feminine mezzo-soprano voice, confident and smooth, clear diction",
+  "ses_yaratilirken_okutulan_metin": "Gerçek mi? Bak, saçım bile kodla çiziliyor!",
+  "tasarim_tohumu": 3036781073,
+  "okuma_tohumu": 3036781073,
+  "referans": "referans.wav",
+  "referans_sn": 3.2,
+  "model": "voxcpm2-q8_0.gguf",
+  "adim": 16,
+  "cfg": 2.0,
+  "yapay": true,
+  "tarih": "2026-11-07 23:27"
+}

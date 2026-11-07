@@ -1,0 +1,17 @@
+{
+  "ad": "defne",
+  "gorunen_ad": "defne",
+  "cesit": 3,
+  "dil": "tr",
+  "ses_yaratici_ingilizce_prompt": "Adult woman in her mid twenties, calm and confident, warm soft feminine voice, smooth and gentle, relaxed friendly tone, clear diction",
+  "ses_yaratilirken_okutulan_metin": "Kıyafetim de kod, bu slaym da. Görsel model yok.",
+  "tasarim_tohumu": 2711444934,
+  "okuma_tohumu": 2711444934,
+  "referans": "referans.wav",
+  "referans_sn": 4.16,
+  "model": "voxcpm2-q8_0.gguf",
+  "adim": 16,
+  "cfg": 2.0,
+  "yapay": true,
+  "tarih": "2026-11-07 23:31"
+}
