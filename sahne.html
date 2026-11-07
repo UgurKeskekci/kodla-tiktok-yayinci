@@ -2630,6 +2630,28 @@ function parmakYol(g,f){
   g.bezierCurveTo(w*0.48,L*0.64,w*0.55,L*0.32,w*0.54,0);
   g.closePath();
 }
+function basparmak(g,S,s,ic,grip,nailAlpha,indexAngle=ic*.30){
+  g.save();
+  g.translate(ic*s*.52,s*.25);
+  // İşaret parmağıyla 32 derece; tutarken uç nesneye doğru içeri kıvrılır.
+  g.rotate(indexAngle-ic*lerp(.56,.27,grip));
+  const L=s*lerp(1.16,.84,grip),w=s*.39,bend=-ic*s*.24*grip;
+  const th=g.createLinearGradient(-w,0,w,0);
+  th.addColorStop(0,KIZ.tenG);th.addColorStop(.48,KIZ.tenAcik);th.addColorStop(1,KIZ.ten);
+  g.fillStyle=th;g.beginPath();
+  g.moveTo(-w*.35,-s*.28);
+  g.bezierCurveTo(-w*.70,L*.12,bend-w*.50,L*.66,bend-w*.39,L*.87);
+  g.quadraticCurveTo(bend,L+w*.18,bend+w*.39,L*.87);
+  g.bezierCurveTo(bend+w*.50,L*.66,w*.70,L*.12,w*.35,-s*.28);
+  g.quadraticCurveTo(0,-s*.34,-w*.35,-s*.28);g.closePath();g.fill();
+  g.strokeStyle=KIZ.tenCizgi;g.lineWidth=S.W*.0011;g.stroke();
+  g.beginPath();g.moveTo(bend-w*.25,L*.54);g.quadraticCurveTo(bend,L*.58,bend+w*.25,L*.54);g.stroke();
+  if(nailAlpha>.02){
+    g.globalAlpha*=nailAlpha;g.fillStyle=KIZ.tirnak;
+    g.beginPath();g.ellipse(bend,L*.79,w*.27,w*.34,0,0,TAU);g.fill();
+  }
+  g.restore();
+}
 function el(g,S,hx,hy,ang,o={}){
   const u=S.W,s=u*.052,grip=o.tut||0,yon=o.yon||1;
   const palmOpen=(1-clamp(grip*5))*EASE.inOut(clamp((-Math.sin(ang)-0.15)/0.55));
@@ -2637,34 +2659,9 @@ function el(g,S,hx,hy,ang,o={}){
   const ic=-yon; // thumb side in local x
   g.save();g.translate(hx,hy);g.rotate(ang-Math.PI/2);
 
-  // Thumb root (thenar eminence) and two-segment anatomical thumb at ~35 deg
-  const drawThumb = () => {
-    g.save();
-    g.translate(ic*s*0.58, -s*0.08);
-    // ~35 deg outward/inward angle depending on grip
-    g.rotate(-ic*(0.58 - 0.32*grip));
-    const th=g.createLinearGradient(-s*.24,0,s*.24,0);
-    th.addColorStop(0,KIZ.tenG);th.addColorStop(.52,KIZ.tenParlak);th.addColorStop(1,KIZ.ten);
-    g.fillStyle=th;
-    const tL = s*(0.92 - 0.22*grip), tw = s*0.38;
-    g.beginPath();
-    // Distinct thumb root mound tapering to rounded distal phalanx
-    g.moveTo(-tw*0.62, -s*0.18);
-    g.bezierCurveTo(-tw*0.68, tL*0.28, -tw*0.50, tL*0.68, -tw*0.38, tL*0.88);
-    g.quadraticCurveTo(0, tL+tw*0.22, tw*0.38, tL*0.88);
-    g.bezierCurveTo(tw*0.52, tL*0.65, tw*0.64, tL*0.25, tw*0.58, -s*0.18);
-    g.quadraticCurveTo(0, -s*0.34, -tw*0.62, -s*0.18);
-    g.closePath();
-    g.fill();
-    g.strokeStyle=KIZ.tenCizgi;g.lineWidth=u*.0011;g.stroke();
-    if (nailAlpha > 0.02) {
-      g.save();g.globalAlpha*=nailAlpha;
-      g.fillStyle=KIZ.tirnak;
-      g.beginPath();g.ellipse(0,tL*0.76,tw*0.28,tw*0.30,0,0,TAU);g.fill();
-      g.restore();
-    }
-    g.restore();
-  };
+  // Başparmak elin iç kenarından ileri uzanır. Kök avucun altında birleşir.
+  const drawThumb = () => basparmak(g,S,s,ic,grip,nailAlpha,parmaklar(o,s).find(f=>f.idx===0).a);
+  drawThumb();
 
   // When palm is down on slime, thumb is slightly under the palm edge; draw fingers with cylindrical light
   for(const f of parmaklar(o,s)){
@@ -2700,13 +2697,13 @@ function el(g,S,hx,hy,ang,o={}){
   g.closePath();
   g.fill();
 
-  drawThumb();
-
   // Soft thenar / palm crease line
+  // El sırtında tenar çizgisi yok; yalnız avuç görünürken ince kıvrım.
+  g.save();g.globalAlpha*=palmOpen;
   g.strokeStyle=KIZ.tenCizgi;g.lineWidth=u*.0013;
   g.beginPath();
-  g.moveTo(ic*s*.46,-s*.16);g.quadraticCurveTo(ic*s*.18,s*.04,ic*s*.36,s*.24);
-  g.stroke();
+  g.moveTo(ic*s*.60,-s*.08);g.quadraticCurveTo(ic*s*.36,s*.10,ic*s*.51,s*.29);
+  g.stroke();g.restore();
   if (palmOpen > 0.05) {
     g.save();g.globalAlpha*=palmOpen;
     g.beginPath();
@@ -2728,7 +2725,7 @@ function kavrama(g,S,x,y,ang,k){
     g.strokeStyle=KIZ.tenCizgi;g.lineWidth=S.W*.0012;g.beginPath();g.moveTo(fx-s*.13,fy+s*.31);g.quadraticCurveTo(fx,fy+s*.37,fx+s*.13,fy+s*.31);g.stroke();
     g.fillStyle=KIZ.tirnak;g.beginPath();g.roundRect(fx-s*.115,fy+s*.44,s*.23,s*.13,s*.05);g.fill();
   }
-  g.save();g.translate(-s*.50,-s*.18);g.rotate(-.8);g.fillStyle=gr;g.beginPath();g.roundRect(-s*.18,0,s*.42,s*1.15,s*.2);g.fill();g.fillStyle=KIZ.tirnak;g.beginPath();g.ellipse(s*.04,s*.9,s*.12,s*.16,0,0,TAU);g.fill();g.restore();
+  basparmak(g,S,s,-1,.85,1,-.30);
   g.restore();
 }
 function batik(g,S,e,ang){
@@ -4898,13 +4895,111 @@ function balonSatirlari(str,maxWidth) {
   }
   if(line)lines.push(line);return lines.length?lines:[''];
 }
+// Arayüz verisi hareket kuyruğundan bağımsızdır; yorumlar aksiyonları beklemez.
+const yayinAkisi={izleyici:null,yorumlar:[],kalpler:[],sira:0};
+const canliMod=q.get('arayuz')==='canli';
+function sigdir(metin,genislik){
+  const chars=Array.from(String(metin));
+  if(g.measureText(chars.join('')).width<=genislik)return chars.join('');
+  while(chars.length&&g.measureText(chars.join('')+'…').width>genislik)chars.pop();
+  return chars.join('')+'…';
+}
+function yayinAvatar(isim,x,y,r){
+  g.fillStyle='#62596d';g.beginPath();g.arc(x,y,r,0,TAU);g.fill();
+  setType(g,TYPE,'text',W*.028,{weight:500});g.fillStyle='#fff';g.textAlign='center';
+  g.fillText(Array.from(isim.trim())[0]?.toLocaleUpperCase('tr-TR')||'•',x,y);g.textAlign='left';
+}
+function hediyeIsareti(x,y,boy){
+  g.save();g.translate(x,y);g.strokeStyle='#f5edf6';g.lineWidth=W*.0028;
+  g.beginPath();g.roundRect(-boy*.55,-boy*.05,boy*1.1,boy*.80,boy*.08);g.stroke();
+  g.strokeRect(-boy*.65,-boy*.29,boy*1.3,boy*.25);
+  g.beginPath();g.moveTo(0,-boy*.29);g.lineTo(0,boy*.75);
+  g.moveTo(0,-boy*.3);g.bezierCurveTo(-boy,-boy*.9,-boy*.5,-boy*1.1,0,-boy*.3);
+  g.bezierCurveTo(boy*.5,-boy*1.1,boy,-boy*.9,0,-boy*.3);g.stroke();g.restore();
+}
+function yayinKatmani(now){
+  const x=W*.03,top=H*.018,barH=W*.08;
+  const panel=(x,y,w,h,r=W*.025)=>{g.fillStyle='rgba(20,20,25,.70)';g.beginPath();g.roundRect(x,y,w,h,r);g.fill();};
+  panel(x,top,W*.54,barH,barH/2);
+  yayinAvatar(KARAKTER.yayin.isim||'Piksel',x+barH/2,top+barH/2,W*.032);
+  setType(g,TYPE,'text',W*.032,{weight:500});g.fillStyle='#fff';
+  g.fillText(sigdir(KARAKTER.yayin.isim||'Piksel',W*.235),x+W*.09,top+barH/2);
+  g.fillStyle='#f1ecef';g.beginPath();g.roundRect(W*.38,top+W*.014,W*.174,W*.052,W*.026);g.fill();
+  setType(g,TYPE,'text',W*.028,{weight:500});g.fillStyle='#302832';g.fillText('Takip et',W*.407,top+barH/2);
+  const liveX=yayinAkisi.izleyici===null?W*.82:W*.63;
+  g.fillStyle='#b63148';g.beginPath();g.roundRect(liveX,top+W*.012,W*.15,W*.056,W*.016);g.fill();
+  setType(g,TYPE,'text',W*.028,{weight:500});g.fillStyle='#fff';g.fillText('CANLI',liveX+W*.025,top+barH/2);
+  if(yayinAkisi.izleyici!==null){
+    panel(W*.80,top+W*.012,W*.17,W*.056);
+    const sayi=Intl.NumberFormat('tr-TR',{notation:'compact',maximumFractionDigits:1}).format(yayinAkisi.izleyici);
+    g.strokeStyle='#eee';g.lineWidth=W*.002;g.beginPath();g.ellipse(W*.824,top+barH/2,W*.013,W*.008,0,0,TAU);g.stroke();
+    g.fillStyle='#fff';g.beginPath();g.arc(W*.824,top+barH/2,W*.0035,0,TAU);g.fill();
+    g.fillText(sigdir(sayi,W*.112),W*.845,top+barH/2);
+  }
+  setType(g,TYPE,'text',W*.028,{weight:400});
+  const etiket='kodla çizildi · yapay zeka yayıncı',ey=top+barH+W*.014;
+  panel(x,ey,g.measureText(etiket).width+W*.03,W*.047,W*.014);
+  g.fillStyle='#eee7f1';g.fillText(etiket,x+W*.015,ey+W*.0235);
+
+  const toast=canliYonetmen.toast,age=toast?now-toast.start:Infinity;
+  if(toast?.msg.hediye&&age>=0&&age<2.5){
+    const m=toast.msg,y=H*.50,w=W*.68,h=W*.084;
+    g.save();g.globalAlpha*=yumusak(age/.22)*yumusak((2.5-age)/.3);
+    g.translate(-W*.025*(1-yumusak(age/.25)),0);panel(x,y,w,h);
+    yayinAvatar(m.kimden||'İzleyici',x+W*.041,y+h/2,W*.027);
+    setType(g,TYPE,'text',W*.029,{weight:500});g.fillStyle='#fff';
+    const gift=` · ${sigdir(m.hediye,W*.22)} x${m.adet}`;
+    const name=sigdir(m.kimden||'İzleyici',Math.max(W*.08,w-W*.16-g.measureText(gift).width));
+    g.fillText(sigdir(name+gift,w-W*.16),x+W*.083,y+h/2);
+    hediyeIsareti(x+w-W*.042,y+h/2,W*.028);g.restore();
+  }
+
+  // En yeni yorum altta; satırlar yalnız yeni olay geldiğinde ölçülür.
+  let bottom=H*.92;
+  const newest=yayinAkisi.yorumlar.at(-1);
+  const shift=newest?W*.030*(1-yumusak((now-newest.at)/.28)):0;
+  let sira=0;   // en fazla ~4 yorum ve eskiler soluk: slime ve eller gorunur kalsin
+  for(const c of [...yayinAkisi.yorumlar].reverse()){
+    if(c.width!==W){
+      setType(g,TYPE,'text',W*.028,{weight:400});
+      const lines=balonSatirlari(c.metin,W*.57);
+      c.lines=lines.slice(0,2);
+      if(lines.length>2)c.lines[1]=sigdir(c.lines[1]+' '+lines.slice(2).join(' '),W*.57);
+      c.width=W;
+    }
+    const h=W*(.054+.030*c.lines.length),y=bottom-h;
+    if(y<H*.70)break;
+    g.save();g.globalAlpha*=yumusak((now-c.at)/.22)*[1,.92,.72,.5][Math.min(3,sira++)];g.translate(0,shift);
+    panel(x,y,W*.70,h,W*.018);yayinAvatar(c.kullanici,x+W*.037,y+W*.039,W*.025);
+    setType(g,TYPE,'text',W*.028,{weight:500});g.fillStyle='#e3d3eb';
+    g.fillText(sigdir(c.kullanici,W*.57),x+W*.078,y+W*.023);
+    setType(g,TYPE,'text',W*.028,{weight:400});g.fillStyle='#fff';
+    c.lines.forEach((line,i)=>g.fillText(line,x+W*.078,y+W*(.058+i*.030)));
+    g.restore();bottom=y-W*.008;
+  }
+  const by=H*.947,bh=W*.075;
+  panel(x,by,W*.69,bh,bh/2);setType(g,TYPE,'text',W*.030,{weight:400});g.fillStyle='#e8e3e9';
+  g.fillText('Yorum ekle...',x+W*.028,by+bh/2);
+  for(const cx of [W*.80,W*.92]){g.fillStyle='rgba(20,20,25,.70)';g.beginPath();g.arc(cx,by+bh/2,W*.0375,0,TAU);g.fill();}
+  hediyeIsareti(W*.80,by+bh/2,W*.031);
+  g.fillStyle='#e6a5b7';kalp(g,W*.92,by+bh*.55,W*.027);g.fill();
+  yayinAkisi.kalpler=yayinAkisi.kalpler.filter(h=>now-h.at<2.2);
+  for(const h of yayinAkisi.kalpler){
+    const age=now-h.at;if(age<0)continue;
+    const k=age/2.2;g.save();g.globalAlpha*=Math.min(1,age*7)*(1-k);
+    g.fillStyle=h.id%2?'#eea8bd':'#d77d9a';
+    kalp(g,W*(.92+Math.sin(age*3+h.id)*.026),H*.94-k*H*.23,W*(.014+.004*(h.id%3)));g.fill();g.restore();
+  }
+}
+
 let kameraOdak = 'tum';
 function canliArayuz(L,now) {
   g.save();g.textAlign='left';g.textBaseline='middle';
   const lx = W * 0.03, ly = H * 0.017, lh = W * 0.044;
   const onizlemeKamerada = q.get('onizleme') === '1' && (kameraOdak === 'yuz' || kameraOdak === 'govde');
+  if(canliMod)yayinKatmani(now);
   // 12a. Top-left transparency pill at (32px, 32px) = (W*0.03, H*0.017), far away from the hair bun
-  if (!onizlemeKamerada && KARAKTER.yayin.etiketAcik !== false && KARAKTER.yayin.etiket) {
+  if (!canliMod && !onizlemeKamerada && KARAKTER.yayin.etiketAcik !== false && KARAKTER.yayin.etiket) {
     setType(g,TYPE,'text',W*.023,{weight:500});
     const isim = KARAKTER.yayin.isim || 'Piksel';
     const hamEtiket = KARAKTER.yayin.etiket;
@@ -4917,7 +5012,7 @@ function canliArayuz(L,now) {
 
   const a=canliYonetmen.current, tToast=canliYonetmen.toast;
   // 12b. Gift/action toast tucked cleanly in top-left corner below the label, never covering arms or torso
-  if(!onizlemeKamerada&&tToast?.msg.kimden&&now-tToast.start<2.8) {
+  if(!canliMod&&!onizlemeKamerada&&tToast?.msg.kimden&&now-tToast.start<2.8) {
     const alpha=yumusak((now-tToast.start)/.28)*yumusak((2.8-now+tToast.start)/.40);
     const names={su:'su',sim:'sim',uzat:'uzatma',durt:'dürtme',selam:'selam',kalp:'kalp'};
     const x=W*.03,y=ly+lh+H*.008,w=W*.34,h=W*.084,pad=W*.018;
@@ -4933,8 +5028,8 @@ function canliArayuz(L,now) {
   // 12c. Speech bubble placed in upper-left space beside her head (shows full text up to 6 lines per page; paginates if longer)
   if(a?.msg.tur==='konus'&&a.msg.balon!==false) {
     const alpha=L.weight;if(alpha>.001) {
-      const x=W*.028,y=H*.118,w=W*.362,padX=W*.020,icGenislik=w-padX*2;
-      setType(g,TYPE,'text',W*.0245,{weight:500});
+      const x=W*.028,y=H*(canliMod?.30:.118),w=W*(canliMod?.39:.362),padX=W*.020,icGenislik=w-padX*2;
+      setType(g,TYPE,'text',W*(canliMod?.028:.0245),{weight:500});
       if(!a.lines||a.linesWidth!==icGenislik){a.lines=balonSatirlari(a.msg.metin,icGenislik);a.linesWidth=icGenislik;}
       const sayfaSatir = 6;
       const pages=Math.max(1,Math.ceil(a.lines.length/sayfaSatir));
@@ -4943,9 +5038,9 @@ function canliArayuz(L,now) {
       const fraction=clamp(gecen/toplamSure,0,.9999);
       const page=Math.min(pages-1,Math.floor(fraction*pages)),lines=a.lines.slice(page*sayfaSatir,(page+1)*sayfaSatir);
       const baslikVar=Boolean(KARAKTER.yayin.isim);
-      const baslikY=baslikVar?W*.030:0;
-      const satirBoyu=W*.034;
-      const h=W*.034+baslikY+lines.length*satirBoyu+(pages>1?W*.018:0);
+      const baslikY=baslikVar?W*(canliMod?.038:.030):0;
+      const satirBoyu=W*(canliMod?.038:.034);
+      const h=W*.034+baslikY+lines.length*satirBoyu+(pages>1?W*(canliMod?.035:.018):0);
       g.globalAlpha=alpha;
       g.fillStyle='rgba(20,20,25,.80)';g.beginPath();g.roundRect(x,y,w,h,W*.022);g.fill();
       // Small pointer on right edge pointing toward her mouth
@@ -4954,21 +5049,21 @@ function canliArayuz(L,now) {
       g.strokeStyle='rgba(255,255,255,.16)';g.lineWidth=Math.max(1,W*.0015);
       g.beginPath();g.roundRect(x,y,w,h,W*.022);g.stroke();
       if(baslikVar){
-        setType(g,TYPE,'text',W*.020,{weight:600});
+        setType(g,TYPE,'text',W*(canliMod?.028:.020),{weight:600});
         g.fillStyle='#c9b3ef';
-        g.fillText(KARAKTER.yayin.isim,x+padX,y+W*.026);
+        g.fillText(sigdir(KARAKTER.yayin.isim,icGenislik),x+padX,y+W*.026);
       }
-      setType(g,TYPE,'text',W*.0245,{weight:500});
+      setType(g,TYPE,'text',W*(canliMod?.028:.0245),{weight:500});
       g.fillStyle='#f8f4fc';
       lines.forEach((line,i)=>g.fillText(line,x+padX,y+W*.032+baslikY+i*satirBoyu));
       if(pages>1){
-        setType(g,TYPE,'text',W*.018,{weight:500});
+        setType(g,TYPE,'text',W*(canliMod?.028:.018),{weight:500});
         g.fillStyle='rgba(220,210,235,.68)';
         g.textAlign='right';
         g.fillText(`${page+1}/${pages}`,x+w-padX,y+h-W*.016);
         g.textAlign='left';
       }
-      setType(g,TYPE,'text',W*.0245,{weight:500});
+      setType(g,TYPE,'text',W*(canliMod?.028:.0245),{weight:500});
       canliYonetmen.bubble={x,y,w,h,lines,page:page+1,pages,maxWidth:Math.max(...lines.map(line=>g.measureText(line).width))};
     }
   } else canliYonetmen.bubble=null;
@@ -4991,9 +5086,28 @@ const canliYonetmen={
       if(!this.started)canliCiz(performance.now()/1000,0);
       return true;
     }
+    if(msg.tur==='izleyici'){
+      if(typeof msg.sayi!=='number'||!Number.isFinite(msg.sayi)||msg.sayi<0)return false;
+      yayinAkisi.izleyici=Math.min(Number.MAX_SAFE_INTEGER,Math.floor(msg.sayi));return true;
+    }
+    if(msg.tur==='yorum'){
+      if(typeof msg.kullanici!=='string'||typeof msg.metin!=='string'||!msg.metin.trim())return false;
+      yayinAkisi.yorumlar.push({kullanici:msg.kullanici.trim().slice(0,100)||'İzleyici',metin:msg.metin.slice(0,1000),at:performance.now()/1000});
+      if(yayinAkisi.yorumlar.length>6)yayinAkisi.yorumlar.shift();return true;
+    }
+    if(msg.tur==='begeni'){
+      if(canliMod){
+        const now=performance.now()/1000;
+        yayinAkisi.kalpler=yayinAkisi.kalpler.filter(h=>now-h.at<2.2);
+        const adet=Number.isFinite(msg.adet)?Math.min(8,Math.max(1,Math.floor(msg.adet))):3;
+        for(let i=0;i<adet;i++)yayinAkisi.kalpler.push({at:now+i*.09,id:yayinAkisi.sira++});
+        yayinAkisi.kalpler=yayinAkisi.kalpler.slice(-40);
+      }
+      return true;
+    }
     let item;
     if(msg.tur==='aksiyon'&&Object.hasOwn(CANLI_KLIP,msg.ad)&&msg.ad!=='konus') {
-      item={tur:'aksiyon',ad:msg.ad,kimden:typeof msg.kimden==='string'?msg.kimden.slice(0,100):'',auto:msg.auto===true,sebep:typeof msg.sebep==='string'?msg.sebep:'',hediye:typeof msg.hediye==='string'?msg.hediye.slice(0,40):'',adet:Math.max(1,+msg.adet||1)};
+      item={tur:'aksiyon',ad:msg.ad,kimden:typeof (msg.kimden??msg.kullanici)==='string'?(msg.kimden??msg.kullanici).slice(0,100):'',auto:msg.auto===true,sebep:typeof msg.sebep==='string'?msg.sebep:'',hediye:typeof msg.hediye==='string'?msg.hediye.slice(0,40):'',adet:Number.isFinite(+msg.adet)?Math.min(9999,Math.max(1,Math.floor(+msg.adet))):1};
     } else if(msg.tur==='konus'&&typeof msg.metin==='string') {
       const id=typeof msg.id==='string'?msg.id.slice(0,256):'';
       if(id&&this.seen.has(id))return false;
@@ -5027,7 +5141,7 @@ const canliYonetmen={
     const clip=CANLI_KLIP[msg.ad];
     const fallback=msg.tur==='konus'?clamp((msg.metin||'').length/13,3,60):0;
     this.current={msg,start:now,duration:clip.duration??Infinity,from:clip.from,flags:new Set(),done:false,fallback};
-    if(msg.kimden)this.toast={msg,start:now};
+    if(msg.kimden||msg.hediye)this.toast={msg,start:now};
     this.nextIdle=now+20+Math.random()*25;
     if(msg.tur==='aksiyon'&&!msg.auto)canliSes.cal(Math.random()<.5?'chime':'notification',.16,1.2);
   },
@@ -5195,7 +5309,7 @@ async function ilkKarakterYukle() {
 }
 addEventListener('message',e=>{
   const d=e.data;if(!d||typeof d!=='object')return;
-  if(d.tur==='karakter'||d.tur==='kamera'||d.tur==='aksiyon'||d.tur==='konus')window.canli.olay(d);
+  if(['karakter','kamera','aksiyon','konus','yorum','izleyici','begeni'].includes(d.tur))window.canli.olay(d);
 });
 
 function canliCiz(now,dt) {

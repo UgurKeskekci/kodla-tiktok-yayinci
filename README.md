@@ -39,6 +39,7 @@ npm start
 - Sahne: http://127.0.0.1:5320/ (OBS için `?obs=1`)
 - Kontrol paneli (deneme yorumu, hediye, TikTok bağlantısı): http://127.0.0.1:5320/panel.html
 - Sunucusuz deneme: `sahne.html?demo=1` dosyasını tarayıcıda açın.
+- Canlı yayın görünümü (yorum akışı, hediye bandı, CANLI rozeti): `http://127.0.0.1:5320/?arayuz=canli`
 
 ## Sesler
 
