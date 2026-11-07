@@ -1,8 +1,12 @@
 # Kodla Yayıncı
 
+Türkçe · [English](README.en.md)
+
 Slime yoğuran, yorumlara sesli cevap veren, **her karesi kodla çizilmiş** bir yayın karakteri. Görsel model yok, video
 modeli yok: karakter, slime, oda, eller, hepsi tek bir HTML dosyasındaki Canvas kodu. Menüden kendi karakterinizi
 yapabilir, ücretsiz seslerle konuşturabilir, isterseniz TikTok canlı yayınına bağlayabilirsiniz.
+
+![Kodla Yayıncı](docs/tanitim.gif)
 
 ![Hazır karakterler](docs/hazir-karakterler.jpg)
 

@@ -2,6 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
+<link rel="icon" href="data:,">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'unsafe-inline'; style-src 'unsafe-inline'; font-src 'self' data:; connect-src 'self';">
 <title>Canlı Slime</title>
 <style>
@@ -5037,7 +5038,8 @@ function canliArayuz(L,now) {
       const gecen=a.voiceStart?Math.max(0,now-a.voiceStart):Math.max(0,L.age-.45);
       const fraction=clamp(gecen/toplamSure,0,.9999);
       const page=Math.min(pages-1,Math.floor(fraction*pages)),lines=a.lines.slice(page*sayfaSatir,(page+1)*sayfaSatir);
-      const baslikVar=Boolean(KARAKTER.yayin.isim);
+      const konusan=a.msg.isim||KARAKTER.yayin.isim;   // balon, konusmaya baslayanin adini tasir (karakter degisse de)
+      const baslikVar=Boolean(konusan);
       const baslikY=baslikVar?W*(canliMod?.038:.030):0;
       const satirBoyu=W*(canliMod?.038:.034);
       const h=W*.034+baslikY+lines.length*satirBoyu+(pages>1?W*(canliMod?.035:.018):0);
@@ -5051,7 +5053,7 @@ function canliArayuz(L,now) {
       if(baslikVar){
         setType(g,TYPE,'text',W*(canliMod?.028:.020),{weight:600});
         g.fillStyle='#c9b3ef';
-        g.fillText(sigdir(KARAKTER.yayin.isim,icGenislik),x+padX,y+W*.026);
+        g.fillText(sigdir(konusan,icGenislik),x+padX,y+W*.026);
       }
       setType(g,TYPE,'text',W*(canliMod?.028:.0245),{weight:500});
       g.fillStyle='#f8f4fc';
@@ -5112,7 +5114,7 @@ const canliYonetmen={
       const id=typeof msg.id==='string'?msg.id.slice(0,256):'';
       if(id&&this.seen.has(id))return false;
       if(id){this.seen.add(id);if(this.seen.size>256)this.seen.delete(this.seen.values().next().value);}
-      item={tur:'konus',ad:'konus',id,balon:msg.balon!==false,metin:msg.metin.slice(0,10000),ses:typeof msg.ses==='string'?msg.ses:'',tts:typeof msg.tts==='string'?msg.tts:'',sesAyar:msg.sesAyar&&typeof msg.sesAyar==='object'?msg.sesAyar:null};
+      item={tur:'konus',ad:'konus',id,isim:KARAKTER.yayin.isim||'',balon:msg.balon!==false,metin:msg.metin.slice(0,10000),ses:typeof msg.ses==='string'?msg.ses:'',tts:typeof msg.tts==='string'?msg.tts:'',sesAyar:msg.sesAyar&&typeof msg.sesAyar==='object'?msg.sesAyar:null};
     } else return false;
     if(this.queue.length>=5) {
       let i=this.queue.findIndex(e=>e.tur==='aksiyon');
