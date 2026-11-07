@@ -1,0 +1,6 @@
+{
+  "edgeTts": "/yol/edge-tts (bos birakilirsa PATH'te aranir)",
+  "voxcpm2Dizini": "/yol/voxcpm2-turkce-ses-tasarimi",
+  "elevenlabsAnahtarDosyasi": "/yol/anahtar.txt (ya da ELEVENLABS_API_KEY ortam degiskeni)",
+  "elevenlabsSesleri": [{ "id": "SES_KIMLIGI", "ad": "Benim sesim" }]
+}

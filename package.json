@@ -1,0 +1,18 @@
+{
+  "name": "kodla-yayinci",
+  "version": "0.1.0",
+  "description": "Her karesi kodla cizilen, ozellestirilebilir yayin karakteri",
+  "main": "sunucu.mjs",
+  "scripts": {
+    "start": "node sunucu.mjs"
+  },
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "tiktok-live-connector": "^2.5.0"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  }
+}

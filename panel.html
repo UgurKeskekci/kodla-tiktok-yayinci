@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canlı yayın paneli</title>
+<style>
+  :root { --zemin: #16181c; --kart: #1f2228; --kenar: #2e323a; --yazi: #e8e8ea; --soluk: #9aa0aa; --vurgu: #fe2c55; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.4 -apple-system, system-ui, sans-serif; background: var(--zemin); color: var(--yazi); }
+  main { display: grid; grid-template-columns: 380px 1fr; gap: 14px; padding: 14px; height: 100vh; }
+  .sol { display: flex; flex-direction: column; gap: 12px; overflow: auto; }
+  section { background: var(--kart); border: 1px solid var(--kenar); border-radius: 10px; padding: 12px; }
+  h2 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--soluk); font-weight: 600; }
+  .satir { display: flex; gap: 6px; margin-bottom: 6px; }
+  input[type=text] { flex: 1; min-width: 0; background: #121418; border: 1px solid var(--kenar); color: var(--yazi); border-radius: 7px; padding: 7px 9px; font: inherit; }
+  button { background: #2a2e36; border: 1px solid var(--kenar); color: var(--yazi); border-radius: 7px; padding: 7px 10px; font: inherit; cursor: pointer; white-space: nowrap; }
+  button:hover { background: #343944; }
+  button.ana { background: var(--vurgu); border-color: var(--vurgu); color: #fff; }
+  .izgara { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .izgara button { font-size: 13px; }
+  label { display: flex; align-items: center; gap: 8px; margin: 4px 0; color: var(--soluk); }
+  .sayilar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; font-size: 12px; color: var(--soluk); }
+  .sayilar b { display: block; color: var(--yazi); font-size: 16px; }
+  .kayit { background: var(--kart); border: 1px solid var(--kenar); border-radius: 10px; padding: 10px 12px; overflow: auto; font: 13px/1.5 ui-monospace, Menlo, monospace; }
+  .kayit div { padding: 1px 0; border-bottom: 1px solid #23262c; }
+  .z { color: #6c727c; } .t { display: inline-block; width: 70px; color: var(--soluk); }
+  .t-konus { color: #7fd3a8; } .t-hata, .t-uyari { color: #ff8a8a; } .t-hediye { color: #ffcf6b; } .t-aksiyon { color: #9db8ff; } .t-suzuldu { color: #6c727c; }
+  .bilgi { font-size: 12px; color: var(--soluk); margin-top: 6px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="sol">
+    <section>
+      <h2>TikTok</h2>
+      <div class="satir"><input id="tkAd" type="text" placeholder="kullanıcı adı (yayın açıkken)"><button class="ana" onclick="tkBagla()">Bağlan</button><button onclick="post('/tiktok',{kapat:true})">Kes</button></div>
+      <div class="bilgi" id="tkDurum">bağlı değil</div>
+    </section>
+    <section>
+      <h2>Deneme yorumu</h2>
+      <div class="satir"><input id="yKim" type="text" value="elif.03" style="flex:.45"><input id="yMetin" type="text" placeholder="yorum yaz, Enter" onkeydown="if(event.key==='Enter')yorum()"></div>
+      <div class="izgara">
+        <button onclick="hazir('sen gerçek misin?')">gerçek misin?</button>
+        <button onclick="hazir('uzat')">uzat</button>
+        <button onclick="hazir('sim ekle')">sim ekle</button>
+        <button onclick="hazir('adın ne?')">adın ne?</button>
+        <button onclick="hazir('su ekle lütfen')">su ekle</button>
+        <button onclick="hazir('çok rahatlatıcı')">rahatlatıcı</button>
+      </div>
+    </section>
+    <section>
+      <h2>Deneme hediye ve olaylar</h2>
+      <div class="izgara">
+        <button onclick="hediye('Gül',1)">Gül (1)</button>
+        <button onclick="hediye('Parmak kalp',5)">Kalp (5)</button>
+        <button onclick="hediye('Dondurma',10)">Dondurma (10)</button>
+        <button onclick="hediye('Galaksi',100)">Galaksi (100)</button>
+        <button onclick="olayGonder({tur:'takip',kullanici:rasgele()})">Takip</button>
+        <button onclick="olayGonder({tur:'katil',kullanici:rasgele()})">Katıldı</button>
+      </div>
+    </section>
+    <section>
+      <h2>Doğrudan hareket</h2>
+      <div class="izgara">
+        <button onclick="post('/aksiyon',{ad:'su'})">Su</button><button onclick="post('/aksiyon',{ad:'sim'})">Sim</button><button onclick="post('/aksiyon',{ad:'uzat'})">Uzat</button>
+        <button onclick="post('/aksiyon',{ad:'durt'})">Dürt</button><button onclick="post('/aksiyon',{ad:'selam'})">Selam</button><button onclick="post('/aksiyon',{ad:'kalp'})">Kalp</button>
+      </div>
+      <div class="satir" style="margin-top:8px"><input id="soz" type="text" placeholder="Piksel'e söylet, Enter" onkeydown="if(event.key==='Enter'){post('/soyle',{metin:this.value});this.value=''}"></div>
+    </section>
+    <section>
+      <h2>Ayarlar</h2>
+      <label><input type="checkbox" id="a-beyin" onchange="ayar('beyin',this.checked)"> Yorumlara cevap ver (beyin)</label>
+      <label><input type="checkbox" id="a-komutlar" onchange="ayar('komutlar',this.checked)"> Yorum komutları (uzat, dürt, su, sim)</label>
+      <label><input type="checkbox" id="a-sessizSohbet" onchange="ayar('sessizSohbet',this.checked)"> Sessizlikte kendisi konuşsun</label>
+      <div class="bilgi" id="arka"></div>
+    </section>
+    <section>
+      <h2>Sayılar</h2>
+      <div class="sayilar" id="sayilar"></div>
+    </section>
+  </div>
+  <div class="kayit" id="kayit"></div>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const post = (yol, veri) => fetch(yol, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(veri) }).then((r) => r.json());
+const ADLAR = ['minik_yildiz', 'deniz_07', 'lilamor27', 'kumsal_23', 'sedef.k', 'ece.slime', 'yaren.y', 'morkopuklu'];
+const rasgele = () => ADLAR[Math.floor(Math.random() * ADLAR.length)];
+const olayGonder = (o) => post('/test', o);
+function yorum() { const m = $('yMetin').value.trim(); if (!m) return; olayGonder({ tur: 'yorum', kullanici: $('yKim').value || 'biri', metin: m }); $('yMetin').value = ''; }
+function hazir(m) { olayGonder({ tur: 'yorum', kullanici: $('yKim').value || rasgele(), metin: m }); }
+function hediye(ad, elmas) { olayGonder({ tur: 'hediye', kullanici: rasgele(), hediye: ad, elmas, adet: 1 }); }
+function ayar(k, v) { post('/ayar', { [k]: v }); }
+async function tkBagla() { const ad = $('tkAd').value.trim(); if (!ad) return; $('tkDurum').textContent = 'bağlanıyor...'; const r = await post('/tiktok', { kullanici: ad }); if (!r.ok) $('tkDurum').textContent = 'bağlanamadı: ' + (r.hata || ''); }
+function durumYaz(d) {
+  for (const k of ['beyin', 'komutlar', 'sessizSohbet']) $('a-' + k).checked = d.ayar[k];
+  $('arka').textContent = `beyin: ${d.beyin} · ses: ${d.ses} · açık sahne: ${d.sahne}`;
+  $('tkDurum').textContent = d.tiktok ? `bağlı: @${d.tiktok}` : 'bağlı değil';
+  const s = d.sayac;
+  $('sayilar').innerHTML = [['yorum', s.yorum], ['hediye', s.hediye], ['takip', s.takip], ['katılan', s.katil], ['beğeni', s.begeni], ['konuşma', s.konusma]].map(([a, b]) => `<div><b>${b}</b>${a}</div>`).join('');
+}
+const es = new EventSource('/panel-akis');
+es.onmessage = (e) => {
+  const m = JSON.parse(e.data);
+  if (m.tur === 'durum') return durumYaz(m.durum);
+  if (m.tur === 'kayit') {
+    const x = m.satir, k = $('kayit'), d = document.createElement('div'), alt = k.scrollTop + k.clientHeight >= k.scrollHeight - 30;
+    d.innerHTML = `<span class="z">${x.zaman}</span> <span class="t t-${x.tur}">${x.tur}</span> `; d.append(document.createTextNode(x.metin));
+    k.append(d); while (k.children.length > 400) k.firstChild.remove(); if (alt) k.scrollTop = k.scrollHeight;
+  }
+};
+setInterval(() => fetch('/durum').then((r) => r.json()).then(durumYaz).catch(() => {}), 3000);
+</script>
+</body>
+</html>

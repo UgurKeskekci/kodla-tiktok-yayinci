@@ -1,0 +1,18 @@
+{
+  "ad": "piksel",
+  "gorunen_ad": "piksel",
+  "cesit": 2,
+  "dil": "tr",
+  "ses_yaratici_ingilizce_prompt": "Young woman in her early twenties, a friendly and cheerful live streamer, bright warm smiling voice, clear crisp diction, medium pitch, relaxed but lively, natural conversational tone",
+  "ses_yaratilirken_okutulan_metin": "Merhaba, ben Piksel. Bu yayında hiçbir şey gerçek değil.",
+  "tasarim_tohumu": 3236498226,
+  "okuma_tohumu": 3236498226,
+  "referans": "referans.wav",
+  "referans_sn": 3.75,
+  "model": "voxcpm2-q8_0.gguf",
+  "adim": 16,
+  "cfg": 2.0,
+  "yapay": true,
+  "tarih": "2026-11-07 21:30",
+  "not": "referans 3,75 sn kesildi: sondaki artik okumalarin basina siziyordu (2026-11-07)"
+}

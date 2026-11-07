@@ -1,0 +1,2105 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Karakter Atölyesi · Canlı Yayın Özelleştirme Menüsü</title>
+<style>
+  :root {
+    --zemin: #111318;
+    --panel: #181b22;
+    --panel-ic: #1d212a;
+    --kart: #222732;
+    --kart-uzerinde: #282e3b;
+    --kart-secili: #2b3242;
+    --girdi: #14171d;
+    --kenar: #2b303c;
+    --kenar-acik: #3e4658;
+    --kenar-secili: #d8dee9;
+    --yazi: #eef0f4;
+    --soluk: #98a1b3;
+    --vurgu: #fe2c55;
+    --vurgu-uzerinde: #ff4267;
+    --yesil: #34d399;
+    --uyari: #f59e0b;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--zemin);
+    color: var(--yazi);
+    font: 13px/1.38 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+  .yerlesim {
+    display: grid;
+    grid-template-columns: calc((100vh - 118px) * 9 / 16 + 20px) minmax(0, 1fr);
+    gap: 12px;
+    height: 100vh;
+    padding: 10px 12px;
+  }
+  @media (max-width: 1320px) {
+    .yerlesim {
+      grid-template-columns: calc((100vh - 112px) * 9 / 16 + 18px) minmax(0, 1fr);
+      gap: 10px;
+      padding: 8px 10px;
+    }
+  }
+
+  /* Sol sütun: Canlı Önizleme + Hareketler */
+  .onizleme-sutun {
+    background: var(--panel);
+    border: 1px solid var(--kenar);
+    border-radius: 12px;
+    padding: 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-height: 0;
+    min-width: 0;
+  }
+  .onizleme-ust {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2px;
+    font-size: 12px;
+    color: var(--soluk);
+    gap: 6px;
+  }
+  .onizleme-ust strong {
+    color: var(--yazi);
+    font-weight: 600;
+  }
+  .onizleme-rozetler {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .durum-etiket {
+    font-size: 11px;
+    color: var(--soluk);
+    background: var(--girdi);
+    border: 1px solid var(--kenar);
+    border-radius: 6px;
+    padding: 2px 7px;
+    white-space: nowrap;
+  }
+  .sahne-cerceve {
+    flex: 1;
+    min-height: 0;
+    background: #14161a;
+    border: 1px solid var(--kenar);
+    border-radius: 9px;
+    overflow: hidden;
+    position: relative;
+  }
+  .sahne-cerceve iframe {
+    border: 0;
+    width: 100%;
+    height: 100%;
+    background: #14161a;
+    display: block;
+    transform: scale(1);
+    transform-origin: 50% 50%;
+    transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), transform-origin 240ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+  /* odak noktasi cerceveye ortalanir: once olcek (origin = yuz/govde), sonra asagi kaydirma; ust kenar bos kalmaz */
+  .sahne-cerceve iframe.odak-yuz {
+    transform-origin: 50% 19.5%;
+    transform: translateY(20.5%) scale(2.2);
+  }
+  .sahne-cerceve iframe.odak-govde {
+    transform-origin: 50% 36%;
+    transform: translateY(12%) scale(1.45);
+  }
+  .sahne-cerceve iframe.odak-tum {
+    transform-origin: 50% 50%;
+    transform: scale(1);
+  }
+  .hareket-cubugu {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .hareket-cubugu button {
+    padding: 6px 3px;
+    font-size: 11.5px;
+    font-weight: 500;
+  }
+  .konustur-satir {
+    display: flex;
+    gap: 5px;
+  }
+  .konustur-satir input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Sağ sütun: Sekmeli Karakter Paneli + Alt Çubuk */
+  .karakter-panel {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 10px;
+    min-height: 0;
+    min-width: 0;
+  }
+  .panel-govde {
+    background: var(--panel);
+    border: 1px solid var(--kenar);
+    border-radius: 12px;
+    display: grid;
+    grid-template-columns: 98px minmax(0, 1fr);
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* Dikey İkon Sekme Çubuğu */
+  .sekme-cubugu {
+    background: var(--girdi);
+    border-right: 1px solid var(--kenar);
+    padding: 8px 6px;
+    display: grid;
+    grid-template-rows: repeat(9, minmax(0, 1fr));
+    gap: 4px;
+    min-height: 0;
+  }
+  .sekme-dugme {
+    position: relative;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    padding: 4px 4px;
+    color: var(--soluk);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+    min-height: 0;
+  }
+  .sekme-dugme:hover {
+    background: var(--panel-ic);
+    color: var(--yazi);
+    border-color: var(--kenar);
+  }
+  .sekme-dugme.secili {
+    background: var(--kart);
+    color: var(--yazi);
+    border-color: var(--kenar-acik);
+    font-weight: 600;
+  }
+  .sekme-dugme.secili::before {
+    content: "";
+    position: absolute;
+    left: -6px;
+    top: 18%;
+    bottom: 18%;
+    width: 3.5px;
+    border-radius: 0 3px 3px 0;
+    background: var(--vurgu);
+  }
+  .sekme-dugme svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    display: block;
+  }
+  .sekme-etiket {
+    font-size: 11px;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .sekme-no {
+    position: absolute;
+    top: 4px;
+    right: 5px;
+    font-size: 9.5px;
+    color: #667085;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+
+  /* Kategori İçerik Alanı */
+  .kategori-alan {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+    padding: 14px 18px;
+    overflow: hidden;
+  }
+  .kategori-ust {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--kenar);
+    flex-shrink: 0;
+  }
+  .kategori-baslik-grup {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    min-width: 0;
+  }
+  .kategori-baslik-grup h1 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .kategori-aciklama {
+    font-size: 12px;
+    color: var(--soluk);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .kategori-kamera-etiket {
+    font-size: 11px;
+    color: var(--soluk);
+    background: var(--girdi);
+    border: 1px solid var(--kenar);
+    border-radius: 6px;
+    padding: 3px 8px;
+    white-space: nowrap;
+  }
+
+  .sekme-icerik {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    justify-content: flex-start;
+  }
+  .sekme-icerik.aktif {
+    display: flex;
+  }
+
+  /* Ayar Blokları */
+  .ayar-blok {
+    background: var(--panel-ic);
+    border: 1px solid var(--kenar);
+    border-radius: 10px;
+    padding: 10px 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+  .ayar-ust {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--yazi);
+  }
+  .ayar-ust .alt-not {
+    font-weight: 400;
+    font-size: 11.5px;
+    color: var(--soluk);
+  }
+  .ayar-ust .deger {
+    font-variant-numeric: tabular-nums;
+    color: var(--soluk);
+    font-size: 11.5px;
+    font-weight: 500;
+    background: var(--girdi);
+    border: 1px solid var(--kenar);
+    padding: 1px 7px;
+    border-radius: 5px;
+  }
+
+  .iki-kolon {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  /* Büyük Karolar (>= 64x64) */
+  .karo-izgara {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+    gap: 8px;
+  }
+  .karo-izgara.besli {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .karo-izgara.yedili {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+  .karo-izgara.ikili {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .secim-karo {
+    position: relative;
+    min-width: 68px;
+    min-height: 76px;
+    background: var(--girdi);
+    border: 1.5px solid var(--kenar);
+    border-radius: 9px;
+    padding: 7px 5px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    color: var(--soluk);
+    font-size: 11.5px;
+    transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+  }
+  .secim-karo:hover {
+    background: var(--kart);
+    border-color: var(--kenar-acik);
+    color: var(--yazi);
+  }
+  .secim-karo.secili {
+    background: var(--kart-secili);
+    border-color: var(--kenar-secili);
+    color: var(--yazi);
+    font-weight: 600;
+  }
+  .secim-karo > svg {
+    width: 38px;
+    height: 36px;
+    display: block;
+    flex-shrink: 0;
+  }
+  .secim-karo .karo-etiket {
+    line-height: 1.15;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  .karo-tik {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--kenar-secili);
+    color: #111318;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .karo-tik > svg {
+    width: 11px;
+    height: 11px;
+    display: block;
+  }
+  .secim-karo.secili .karo-tik {
+    display: inline-flex;
+  }
+
+  /* Büyük Yuvarlak Renk Örnekleri (36px+) */
+  .renk-satir {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .ton-dugme {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.18);
+    padding: 0;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 150ms ease, border-color 150ms ease;
+  }
+  .ton-dugme:hover {
+    border-color: rgba(255, 255, 255, 0.65);
+    transform: scale(1.05);
+  }
+  .ton-dugme.secili {
+    border: 2.5px solid #ffffff;
+    box-shadow: 0 0 0 2px #14171d, 0 0 0 3.5px rgba(255, 255, 255, 0.55);
+  }
+  .ton-dugme.secili::after {
+    content: "";
+    width: 10px;
+    height: 6px;
+    border-left: 2px solid #ffffff;
+    border-bottom: 2px solid #ffffff;
+    transform: rotate(-45deg) translate(1px, -1px);
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.85));
+  }
+  .serbest-renk {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    background: var(--girdi);
+    border: 1.5px solid var(--kenar);
+    border-radius: 20px;
+    padding: 4px 10px 4px 5px;
+    height: 38px;
+    font-size: 11.5px;
+    color: var(--yazi);
+    cursor: pointer;
+    transition: border-color 150ms ease, background 150ms ease;
+  }
+  .serbest-renk:hover {
+    border-color: var(--kenar-acik);
+    background: var(--kart);
+  }
+  .serbest-renk input[type="color"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  .serbest-renk input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+  .serbest-renk input[type="color"]::-webkit-color-swatch {
+    border: 1.5px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+  }
+
+  /* Hazır Karakter Kartları (Büyük 2x2 Izgara) */
+  .hazir-izgara {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    flex: 1;
+    min-height: 0;
+  }
+  .hazir-kart {
+    position: relative;
+    background: var(--panel-ic);
+    border: 1.5px solid var(--kenar);
+    border-radius: 12px;
+    padding: 8px 8px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    cursor: pointer;
+    text-align: left;
+    min-width: 0;
+    min-height: 0;
+    white-space: normal;
+    transition: background 160ms ease, border-color 160ms ease;
+  }
+  .hazir-kart:hover {
+    background: var(--kart);
+    border-color: var(--kenar-acik);
+  }
+  .hazir-kart.secili {
+    background: var(--kart-secili);
+    border-color: var(--kenar-secili);
+  }
+  /* portre: sahnenin kendisinden render edilmis gercek goruntu (assets/hazir/<id>.jpg), yoksa eski mini cizim */
+  .hazir-kart .hazir-portre, .hazir-kart canvas {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    object-position: 50% 0%;
+    border-radius: 8px;
+    background: #14171d;
+    border: 1px solid var(--kenar);
+    display: block;
+  }
+  .hazir-kart .hazir-metin { padding: 0 4px; }
+  .hazir-metin {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+  }
+  .hazir-metin b {
+    font-size: 15px;
+    color: var(--yazi);
+  }
+  .hazir-metin span {
+    font-size: 12px;
+    color: var(--soluk);
+    line-height: 1.35;
+  }
+  .hazir-etiketler {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 3px;
+  }
+  .hazir-etiketler em {
+    font-style: normal;
+    font-size: 11px;
+    color: var(--yazi);
+    background: var(--girdi);
+    border: 1px solid var(--kenar);
+    border-radius: 5px;
+    padding: 2px 7px;
+  }
+  .hazir-kart .karo-tik {
+    top: 10px;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+  }
+  .hazir-kart.secili .karo-tik {
+    display: inline-flex;
+  }
+
+  /* Kaydırıcı Satırı */
+  .kaydirici-kutu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .kaydirici-uc {
+    font-size: 11px;
+    color: var(--soluk);
+    white-space: nowrap;
+  }
+  input[type="range"] {
+    width: 100%;
+    accent-color: #d8dee9;
+    cursor: pointer;
+    height: 18px;
+    margin: 0;
+  }
+
+  /* Ses Motorları */
+  .motor-liste {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .motor-kart {
+    position: relative;
+    background: var(--girdi);
+    border: 1.5px solid var(--kenar);
+    border-radius: 8px;
+    padding: 9px 11px;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    min-width: 0;
+    white-space: normal;
+  }
+  .motor-kart:hover {
+    background: var(--kart);
+    border-color: var(--kenar-acik);
+  }
+  .motor-kart.secili {
+    background: var(--kart-secili);
+    border-color: var(--kenar-secili);
+  }
+  .motor-kart.kurulu-degil {
+    opacity: .6;
+  }
+  .motor-kart-ust {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--yazi);
+    gap: 6px;
+  }
+  .motor-durum {
+    font-size: 10.5px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: #252932;
+    color: var(--soluk);
+    flex-shrink: 0;
+  }
+  .motor-kart.hazir .motor-durum {
+    color: #98e6c0;
+    background: rgba(52, 211, 153, 0.14);
+  }
+  .motor-not {
+    font-size: 11px;
+    color: var(--soluk);
+    line-height: 1.3;
+  }
+
+  /* Alt Çubuk */
+  .alt-cubuk {
+    background: var(--panel);
+    border: 1px solid var(--kenar);
+    border-radius: 11px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .alt-sol, .alt-sag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .alt-ayirici {
+    width: 1px;
+    height: 22px;
+    background: var(--kenar);
+    margin: 0 2px;
+  }
+  .durum-kutu {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    padding: 0 4px;
+  }
+  .kaydedilmedi-rozet {
+    display: none;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    color: #fbbf24;
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.32);
+    border-radius: 6px;
+    padding: 3px 8px;
+    white-space: nowrap;
+  }
+  .kaydedilmedi-rozet.gorunur {
+    display: inline-flex;
+  }
+  .kaydedilmedi-rozet .nokta {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #fbbf24;
+  }
+  .bildirim {
+    font-size: 11.5px;
+    color: var(--soluk);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+  }
+  .bildirim.oldu { color: var(--yesil); }
+
+  /* Düğmeler & Girdiler */
+  button, .dosya-dugme {
+    background: var(--kart);
+    border: 1px solid var(--kenar);
+    color: var(--yazi);
+    border-radius: 7px;
+    padding: 6px 10px;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 150ms ease, background 150ms ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+  button:hover:not(:disabled), .dosya-dugme:hover {
+    background: var(--kart-uzerinde);
+    border-color: var(--kenar-acik);
+  }
+  button:focus-visible, .dosya-dugme:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 2px solid var(--kenar-secili);
+    outline-offset: 1px;
+  }
+  button:disabled {
+    opacity: .42;
+    cursor: not-allowed;
+  }
+  button.ana {
+    background: var(--vurgu);
+    border-color: var(--vurgu);
+    color: #fff;
+    font-weight: 600;
+    padding: 6px 15px;
+  }
+  button.ana:hover:not(:disabled) {
+    background: var(--vurgu-uzerinde);
+    border-color: var(--vurgu-uzerinde);
+  }
+  input[type="text"], select {
+    background: var(--girdi);
+    border: 1px solid var(--kenar);
+    color: var(--yazi);
+    border-radius: 7px;
+    padding: 7px 10px;
+    font: inherit;
+    font-size: 12.5px;
+    width: 100%;
+    min-width: 0;
+  }
+  input[type="text"]:focus, select:focus {
+    outline: none;
+    border-color: var(--kenar-secili);
+  }
+
+  /* 1280x800 sıkı yerleşim uyumu */
+  @media (max-height: 830px) {
+    .kategori-alan {
+      padding: 10px 14px;
+    }
+    .kategori-ust {
+      padding-bottom: 7px;
+      margin-bottom: 8px;
+    }
+    .sekme-icerik {
+      gap: 8px;
+    }
+    .ayar-blok {
+      padding: 8px 11px;
+      gap: 6px;
+    }
+    .secim-karo {
+      min-height: 66px;
+      min-width: 64px;
+      padding: 5px 4px;
+      gap: 3px;
+    }
+    .secim-karo > svg {
+      width: 34px;
+      height: 32px;
+    }
+    .ton-dugme {
+      width: 36px;
+      height: 36px;
+    }
+    .serbest-renk {
+      height: 36px;
+    }
+    .alt-cubuk {
+      padding: 6px 10px;
+    }
+    .alt-cubuk button, .alt-cubuk .dosya-dugme {
+      padding: 5px 8px;
+      font-size: 11.5px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="yerlesim">
+  <!-- SOL: Canlı Önizleme + Hareket ve Konuşturma -->
+  <aside class="onizleme-sutun">
+    <div class="onizleme-ust">
+      <strong>Canlı Önizleme</strong>
+      <div class="onizleme-rozetler">
+        <span class="durum-etiket" id="kameraDurum">Kamera: Tüm kare</span>
+        <span class="durum-etiket" id="sahneDurum">sahne.html?onizleme=1</span>
+      </div>
+    </div>
+    <div class="sahne-cerceve">
+      <iframe id="onizlemeFrame" class="odak-tum" title="Canlı Sahne Önizlemesi"></iframe>
+    </div>
+    <div class="hareket-cubugu">
+      <button type="button" onclick="aksiyonTetikle('su')">Su</button>
+      <button type="button" onclick="aksiyonTetikle('sim')">Sim</button>
+      <button type="button" onclick="aksiyonTetikle('uzat')">Uzat</button>
+      <button type="button" onclick="aksiyonTetikle('durt')">Dürt</button>
+      <button type="button" onclick="aksiyonTetikle('selam')">Selam</button>
+      <button type="button" onclick="aksiyonTetikle('kalp')">Kalp</button>
+    </div>
+    <div class="konustur-satir">
+      <input id="konusturGirdi" type="text" placeholder="Karaktere söylet (Enter)..." onkeydown="if(event.key==='Enter')konustur()">
+      <button type="button" onclick="konustur()">Konuştur</button>
+    </div>
+  </aside>
+
+  <!-- SAĞ: Sekmeli Karakter Oluşturma Paneli -->
+  <main class="karakter-panel">
+    <div class="panel-govde">
+      <!-- Dikey İkon Sekme Çubuğu -->
+      <nav class="sekme-cubugu" id="sekmeCubugu" aria-label="Karakter Kategorileri"></nav>
+
+      <!-- Açık Kategori Alanı -->
+      <div class="kategori-alan">
+        <header class="kategori-ust">
+          <div class="kategori-baslik-grup">
+            <h1 id="kategoriBaslik">Hazır Karakterler</h1>
+            <span class="kategori-aciklama" id="kategoriAciklama">Hızlı başlangıç için hazır bir yayıncı seçin</span>
+          </div>
+          <span class="kategori-kamera-etiket" id="aktifPresetEtiket">Seçili: Piksel</span>
+        </header>
+
+        <!-- 1. HAZIR -->
+        <section class="sekme-icerik aktif" id="sekme-hazir" data-sekme="hazir">
+          <div class="hazir-izgara" id="hazirKartlar"></div>
+        </section>
+
+        <!-- 2. YÜZ -->
+        <section class="sekme-icerik" id="sekme-yuz" data-sekme="yuz">
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Ten rengi <span class="alt-not">(8 doğal ton + özel)</span></span><span class="deger" id="etiket-ten"></span></div>
+            <div class="renk-satir" id="palet-ten"></div>
+          </div>
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Göz rengi</span><span class="deger" id="etiket-goz"></span></div>
+            <div class="renk-satir" id="palet-goz"></div>
+          </div>
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Dudak rengi</span><span class="deger" id="etiket-dudak"></span></div>
+            <div class="renk-satir" id="palet-dudak"></div>
+          </div>
+          <div class="iki-kolon">
+            <div class="ayar-blok">
+              <div class="ayar-ust"><span>Kaş kalınlığı</span><span class="deger" id="etiket-kas">1.00×</span></div>
+              <div class="kaydirici-kutu">
+                <span class="kaydirici-uc">İnce</span>
+                <input id="ayar-kas" type="range" min="0.50" max="1.80" step="0.05" value="1.00" oninput="alanDegisti('kisi','kasKalinligi',+this.value)">
+                <span class="kaydirici-uc">Kalın</span>
+              </div>
+            </div>
+            <div class="ayar-blok">
+              <div class="ayar-ust"><span>Çil detayı</span><span class="deger" id="etiket-cil">Yok</span></div>
+              <div class="karo-izgara ikili" id="secim-cil"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. SAÇ -->
+        <section class="sekme-icerik" id="sekme-sac" data-sekme="sac">
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Saç modeli</span><span class="deger" id="etiket-sacModeli">Topuz</span></div>
+            <div class="karo-izgara besli" id="secim-sacModeli"></div>
+          </div>
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Saç rengi</span><span class="deger" id="etiket-sac"></span></div>
+            <div class="renk-satir" id="palet-sac"></div>
+          </div>
+        </section>
+
+        <!-- 4. KIYAFET -->
+        <section class="sekme-icerik" id="sekme-kiyafet" data-sekme="kiyafet">
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Kıyafet modeli <span class="alt-not">(kazakta örgü dokusu desenin altında yer alır)</span></span><span class="deger" id="etiket-kiyafetModel">Tişört</span></div>
+            <div class="karo-izgara yedili" id="secim-kiyafetModel"></div>
+          </div>
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Üst ana rengi</span><span class="deger" id="etiket-ust"></span></div>
+            <div class="renk-satir" id="palet-ust"></div>
+          </div>
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>İkinci renk <span class="alt-not">(kapüşon içi, salopet askısı, gömlek düğmesi için)</span></span><span class="deger" id="etiket-ikinciRenk"></span></div>
+            <div class="renk-satir" id="palet-ikinciRenk"></div>
+          </div>
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Kumaş deseni</span><span class="deger" id="etiket-desen">Çiçek</span></div>
+            <div class="karo-izgara besli" id="secim-desen"></div>
+          </div>
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Desen rengi</span><span class="deger" id="etiket-desenRengi"></span></div>
+            <div class="renk-satir" id="palet-desenRengi"></div>
+          </div>
+        </section>
+
+        <!-- 5. AKSESUAR -->
+        <section class="sekme-icerik" id="sekme-aksesuar" data-sekme="aksesuar">
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Baş aksesuarı</span><span class="deger" id="etiket-basAksesuar">Yok</span></div>
+            <div class="karo-izgara besli" id="secim-basAksesuar"></div>
+          </div>
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Baş aksesuarı rengi</span><span class="deger" id="etiket-basRengi"></span></div>
+            <div class="renk-satir" id="palet-basRengi"></div>
+          </div>
+          <div class="iki-kolon">
+            <div class="ayar-blok">
+              <div class="ayar-ust"><span>Küpe</span><span class="deger" id="etiket-kupe">Takılı</span></div>
+              <div class="karo-izgara ikili" id="secim-kupe"></div>
+            </div>
+            <div class="ayar-blok">
+              <div class="ayar-ust"><span>Gözlük</span><span class="deger" id="etiket-gozluk">Yok</span></div>
+              <div class="karo-izgara ikili" id="secim-gozluk"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. SLİME -->
+        <section class="sekme-icerik" id="sekme-slime" data-sekme="slime">
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Slime ana rengi</span><span class="deger" id="etiket-slimeRenk"></span></div>
+            <div class="renk-satir" id="palet-slimeRenk"></div>
+          </div>
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Saydamlık</span><span class="deger" id="etiket-saydamlik">%94</span></div>
+            <div class="kaydirici-kutu">
+              <span class="kaydirici-uc">Yarı saydam (%30)</span>
+              <input id="ayar-saydamlik" type="range" min="0.30" max="1.00" step="0.02" value="0.94" oninput="alanDegisti('slime','saydamlik',+this.value)">
+              <span class="kaydirici-uc">Tok (%100)</span>
+            </div>
+          </div>
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Sim rengi</span><span class="deger" id="etiket-simRengi"></span></div>
+            <div class="renk-satir" id="palet-simRengi"></div>
+          </div>
+        </section>
+
+        <!-- 7. ODA -->
+        <section class="sekme-icerik" id="sekme-oda" data-sekme="oda">
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Duvar rengi</span><span class="deger" id="etiket-duvar"></span></div>
+            <div class="renk-satir" id="palet-duvar"></div>
+          </div>
+          <div class="iki-kolon" style="grid-template-columns: 240px minmax(0, 1fr);">
+            <div class="ayar-blok">
+              <div class="ayar-ust"><span>LED durumu</span><span class="deger" id="etiket-ledDurum">Açık</span></div>
+              <div class="karo-izgara ikili" id="secim-ledAcik"></div>
+            </div>
+            <div class="ayar-blok" style="justify-content: center;">
+              <div class="ayar-ust"><span>LED ışık rengi</span><span class="deger" id="etiket-led"></span></div>
+              <div class="renk-satir" id="palet-led"></div>
+            </div>
+          </div>
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Masa tonu</span><span class="deger" id="etiket-masa"></span></div>
+            <div class="renk-satir" id="palet-masa"></div>
+          </div>
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Tepsi rengi</span><span class="deger" id="etiket-tepsi"></span></div>
+            <div class="renk-satir" id="palet-tepsi"></div>
+          </div>
+        </section>
+
+        <!-- 8. SES -->
+        <section class="sekme-icerik" id="sekme-ses" data-sekme="ses">
+          <div class="ayar-blok">
+            <div class="ayar-ust">
+              <span>Ses motoru</span>
+              <button type="button" onclick="ornekSesDinle()">Dinle</button>
+            </div>
+            <div class="motor-liste" id="motorListesi"></div>
+          </div>
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Ses kimliği</span></div>
+            <select id="ayar-sesKimlik" onchange="alanDegisti('ses','kimlik',this.value)"></select>
+          </div>
+          <div class="iki-kolon">
+            <div class="ayar-blok">
+              <div class="ayar-ust"><span>Konuşma hızı</span><span class="deger" id="etiket-hiz">1.05×</span></div>
+              <div class="kaydirici-kutu">
+                <span class="kaydirici-uc">Yavaş</span>
+                <input id="ayar-hiz" type="range" min="0.65" max="1.45" step="0.05" value="1.05" oninput="alanDegisti('ses','hiz',+this.value)">
+                <span class="kaydirici-uc">Hızlı</span>
+              </div>
+            </div>
+            <div class="ayar-blok">
+              <div class="ayar-ust"><span>Ses perdesi</span><span class="deger" id="etiket-perde">1.00×</span></div>
+              <div class="kaydirici-kutu">
+                <span class="kaydirici-uc">Kalın</span>
+                <input id="ayar-perde" type="range" min="0.70" max="1.35" step="0.05" value="1.00" oninput="alanDegisti('ses','perde',+this.value)">
+                <span class="kaydirici-uc">İnce</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 9. YAYIN -->
+        <section class="sekme-icerik" id="sekme-yayin" data-sekme="yayin">
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Yayıncı ismi</span></div>
+            <input id="ayar-isim" type="text" maxlength="28" placeholder="Piksel" oninput="alanDegisti('yayin','isim',this.value)">
+          </div>
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Şeffaflık etiketi görünürlüğü</span><span class="deger" id="etiket-etiketAcik">Açık</span></div>
+            <div class="karo-izgara ikili" id="secim-etiketAcik"></div>
+          </div>
+          <div class="ayar-blok">
+            <div class="ayar-ust"><span>Şeffaflık etiketi metni</span></div>
+            <input id="ayar-etiket" type="text" maxlength="80" placeholder="kodla çizildi · yapay zeka yayıncı" oninput="alanDegisti('yayin','etiket',this.value)">
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Alt Araç Çubuğu -->
+    <footer class="alt-cubuk">
+      <div class="alt-sol">
+        <button type="button" id="geriAlDugme" onclick="geriAl()" disabled title="Geri al (Ctrl/Cmd+Z)">Geri al</button>
+        <button type="button" id="ileriAlDugme" onclick="ileriAl()" disabled title="İleri al (Ctrl/Cmd+Shift+Z)">İleri al</button>
+        <span class="alt-ayirici"></span>
+        <button type="button" id="rastgeleDugme" onclick="rastgeleTiklandi(event)" title="Açık kategoriyi rastgele seç (Shift+tık: tüm kategoriler)">Rastgele</button>
+        <button type="button" onclick="sifirlaKarakter()">Sıfırla</button>
+      </div>
+
+      <div class="durum-kutu">
+        <span class="kaydedilmedi-rozet" id="kaydedilmediRozet"><span class="nokta"></span>Kaydedilmemiş değişiklik var</span>
+        <span class="bildirim" id="bildirimMetin">Hazır</span>
+      </div>
+
+      <div class="alt-sag">
+        <button type="button" onclick="jsonIndir()">JSON indir</button>
+        <label class="dosya-dugme">
+          JSON yükle
+          <input id="jsonDosyaGirdi" type="file" accept=".json,application/json" hidden onchange="jsonYukle(event)">
+        </label>
+        <button type="button" onclick="paylasimLinkiKopyala()">Paylaşım linki</button>
+        <button type="button" class="ana" id="kaydetDugme" onclick="sunucuyaKaydet()">Kaydet</button>
+      </div>
+    </footer>
+  </main>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+const TIK_SVG = `<span class="karo-tik" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.3L6.6 11.4L12.6 4.8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+
+const SEKMELER = [
+  {
+    id: 'hazir', no: 1, etiket: 'Hazır', baslik: 'Hazır Karakterler',
+    aciklama: 'Tek tıkla hazır bir yayıncı yükleyin veya üzerine özelleştirme yapın',
+    odak: 'tum',
+    svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="2"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="2"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="2"/><rect x="13" y="13" width="7.5" height="7.5" rx="2"/></svg>`
+  },
+  {
+    id: 'yuz', no: 2, etiket: 'Yüz', baslik: 'Yüz Hatları',
+    aciklama: 'Ten tonu, göz, kaş kalınlığı, dudak rengi ve çil detayları',
+    odak: 'yuz',
+    svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="9.2" cy="10.5" r="1" fill="currentColor" stroke="none"/><circle cx="14.8" cy="10.5" r="1" fill="currentColor" stroke="none"/><path d="M9 15c1.5 1.3 4.5 1.3 6 0"/></svg>`
+  },
+  {
+    id: 'sac', no: 3, etiket: 'Saç', baslik: 'Saç Modeli ve Rengi',
+    aciklama: 'Karakterin saç kesimini ve saç tonunu belirleyin',
+    odak: 'yuz',
+    svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5.5" r="2.8"/><path d="M5 17c0-6 2.8-9.5 7-9.5s7 3.5 7 9.5"/><path d="M7.5 14.5c1.2-1.8 2.8-2.6 4.5-2.6s3.3.8 4.5 2.6"/></svg>`
+  },
+  {
+    id: 'kiyafet', no: 4, etiket: 'Kıyafet', baslik: 'Kıyafet ve Desen',
+    aciklama: 'Üst kesimi, ana/ikinci renkleri ve kumaş desenini seçin',
+    odak: 'govde',
+    svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5L4 7.5l2 4 2.5-1.2V19.5h7V10.3L18 11.5l2-4-4.5-3c-.9 1.4-2.1 2.1-3.5 2.1s-2.6-.7-3.5-2.1z"/></svg>`
+  },
+  {
+    id: 'aksesuar', no: 5, etiket: 'Aksesuar', baslik: 'Baş ve Yüz Aksesuarları',
+    aciklama: 'Kulaklık, bere, kurdele, toka, küpe ve gözlük seçenekleri',
+    odak: 'yuz',
+    svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 13v-1a7.5 7.5 0 0 1 15 0v1"/><rect x="3.5" y="12.5" width="3.2" height="5.5" rx="1.4"/><rect x="17.3" y="12.5" width="3.2" height="5.5" rx="1.4"/></svg>`
+  },
+  {
+    id: 'slime', no: 6, etiket: 'Slime', baslik: 'Slime Dokusu',
+    aciklama: 'Yoğrulan slime hamurunun rengi, saydamlığı ve sim parıltısı',
+    odak: 'tum',
+    svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15.5c0-3.8 3.6-6.8 8-6.8s8 3 8 6.8c0 2.6-2.8 4-8 4s-8-1.4-8-4z"/><path d="M8.5 13.2c1.2-1 2.6-1.4 4.2-1.2"/><circle cx="15.5" cy="14.5" r="0.9" fill="currentColor" stroke="none"/></svg>`
+  },
+  {
+    id: 'oda', no: 7, etiket: 'Oda', baslik: 'Stüdyo ve Oda',
+    aciklama: 'Arka plan duvarı, LED ışık dizisi, ahşap masa ve tepsi',
+    odak: 'tum',
+    svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 14.5h17"/><path d="M6.5 8c3.5 1.8 7.5 1.8 11 0"/></svg>`
+  },
+  {
+    id: 'ses', no: 8, etiket: 'Ses', baslik: 'Ses ve Konuşma',
+    aciklama: 'Seslendirme motoru, ses kimliği, konuşma hızı ve perde',
+    odak: 'tum',
+    svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3.5" width="6" height="10.5" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5v3"/><path d="M9 20.5h6"/></svg>`
+  },
+  {
+    id: 'yayin', no: 9, etiket: 'Yayın', baslik: 'Yayın Bilgileri',
+    aciklama: 'Yayıncı adı ve sol üst şeffaflık etiketi ayarları',
+    odak: 'tum',
+    svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.5"/><path d="M7.8 7.8a6 6 0 0 0 0 8.4"/><path d="M16.2 7.8a6 6 0 0 1 0 8.4"/><path d="M4.8 4.8a10 10 0 0 0 0 14.4"/><path d="M19.2 4.8a10 10 0 0 1 0 14.4"/></svg>`
+  },
+];
+
+const HAZIR_KARAKTERLER = {
+  piksel: {
+    preset: 'piksel',
+    ad: 'Piksel',
+    aciklama: 'Topuz saç, çiçekli lila tişört ve mor slime',
+    etiketler: ['Topuz', 'Tişört · Çiçek', 'Mor Slime'],
+    kisi: { ten: '#e7b493', sac: '#3b2419', sacModeli: 'topuz', goz: '#4b2d1d', kasKalinligi: 1.0, dudak: '#c66d6a', cil: false, kupe: true, gozluk: false },
+    kiyafet: { model: 'tisort', ust: '#f3e3f2', ikinciRenk: '#d8b4e2', desen: 'cicek', desenRengi: '#9a6fd0', bas: 'yok', basRengi: '#9a6fd0' },
+    slime: { renk: '#9b5de5', saydamlik: 0.94, simRengi: '#ffe6a3' },
+    oda: { duvar: '#cbbfb0', led: '#3ce6e6', ledAcik: true, masa: '#93613c', tepsi: '#bfb7c2' },
+    yayin: { isim: 'Piksel', etiket: 'kodla çizildi · yapay zeka yayıncı', etiketAcik: true },
+    ses: { motor: 'edge', kimlik: 'tr-TR-EmelNeural', hiz: 1.05, perde: 1.0 },
+  },
+  oyuncu: {
+    preset: 'oyuncu',
+    ad: 'Gece',
+    aciklama: 'Mavi at kuyruğu, yıldızlı kapüşonlu ve pembe slime',
+    etiketler: ['At kuyruğu', 'Kapüşonlu · Yıldız', 'Pembe Slime'],
+    kisi: { ten: '#f3c6ac', sac: '#246ce6', sacModeli: 'atkuyrugu', goz: '#2b8a62', kasKalinligi: 1.05, dudak: '#d46078', cil: true, kupe: true, gozluk: false },
+    kiyafet: { model: 'kapusonlu', ust: '#23273a', ikinciRenk: '#ff5ca8', desen: 'yildiz', desenRengi: '#ff5ca8', bas: 'kulaklik', basRengi: '#246ce6' },
+    slime: { renk: '#ec4899', saydamlik: 0.92, simRengi: '#98f8ff' },
+    oda: { duvar: '#6c7086', led: '#ff4da6', ledAcik: true, masa: '#583824', tepsi: '#8c90a4' },
+    yayin: { isim: 'Gece', etiket: 'kodla çizildi · yapay zeka yayıncı', etiketAcik: true },
+    ses: { motor: 'edge', kimlik: 'tr-TR-EmelNeural', hiz: 1.12, perde: 1.06 },
+  },
+  kivircik: {
+    preset: 'kivircik',
+    ad: 'Defne',
+    aciklama: 'Kıvırcık saç, çizgili kazak ve zümrüt slime',
+    etiketler: ['Kıvırcık', 'Kazak · Çizgili', 'Zümrüt Slime'],
+    kisi: { ten: '#8d5538', sac: '#18141a', sacModeli: 'kivircik', goz: '#6e441b', kasKalinligi: 1.18, dudak: '#b85258', cil: false, kupe: true, gozluk: false },
+    kiyafet: { model: 'kazak', ust: '#fae8b4', ikinciRenk: '#d45b3e', desen: 'cizgili', desenRengi: '#d45b3e', bas: 'toka', basRengi: '#d45b3e' },
+    slime: { renk: '#2ec46d', saydamlik: 0.92, simRengi: '#fff0a8' },
+    oda: { duvar: '#cfbda8', led: '#ffb84d', ledAcik: true, masa: '#8c5832', tepsi: '#c8beb4' },
+    yayin: { isim: 'Defne', etiket: 'kodla çizildi · yapay zeka yayıncı', etiketAcik: true },
+    ses: { motor: 'edge', kimlik: 'tr-TR-EmelNeural', hiz: 1.0, perde: 0.98 },
+  },
+  gozluklu: {
+    preset: 'gozluklu',
+    ad: 'Mavi',
+    aciklama: 'Kısa küt saç, gözlük, salopet ve şeffaf buz slime',
+    etiketler: ['Kısa küt · Gözlük', 'Salopet · Puantiye', 'Buz Slime'],
+    kisi: { ten: '#f6d8c4', sac: '#9e3428', sacModeli: 'kut', goz: '#3a78b8', kasKalinligi: 0.92, dudak: '#c86b7a', cil: true, kupe: false, gozluk: true },
+    kiyafet: { model: 'salopet', ust: '#dceefb', ikinciRenk: '#3968a8', desen: 'puantiye', desenRengi: '#3968a8', bas: 'bere', basRengi: '#3968a8' },
+    slime: { renk: '#58bce8', saydamlik: 0.56, simRengi: '#ffffff' },
+    oda: { duvar: '#b8c2cc', led: '#a86cf5', ledAcik: true, masa: '#785e4d', tepsi: '#c2cad4' },
+    yayin: { isim: 'Mavi', etiket: 'kodla çizildi · yapay zeka yayıncı', etiketAcik: true },
+    ses: { motor: 'edge', kimlik: 'tr-TR-EmelNeural', hiz: 1.02, perde: 1.04 },
+  },
+};
+
+const RENK_PALETLERI = {
+  ten: ['#fce3d2', '#f6d8c4', '#f3c6ac', '#e7b493', '#d89c74', '#b8764f', '#8d5538', '#5c3522'],
+  sac: ['#3b2419', '#18141a', '#9e3428', '#d4943a', '#e8c468', '#246ce6', '#9333ea', '#e14b85'],
+  goz: ['#4b2d1d', '#6e441b', '#2b8a62', '#3a78b8', '#6b5b95', '#475569', '#232329'],
+  dudak: ['#c66d6a', '#d46078', '#b85258', '#c86b7a', '#9e3d48', '#e07a72', '#a8556f'],
+  ust: ['#f3e3f2', '#23273a', '#fae8b4', '#dceefb', '#d8f3dc', '#ffe0e6', '#343a46', '#e2d9f3'],
+  ikinciRenk: ['#d8b4e2', '#ff5ca8', '#d45b3e', '#3968a8', '#2ec46d', '#f59e0b', '#475569', '#ffffff'],
+  desenRengi: ['#9a6fd0', '#ff5ca8', '#d45b3e', '#3968a8', '#2ec46d', '#f59e0b', '#ffffff', '#1e293b'],
+  basRengi: ['#9a6fd0', '#246ce6', '#d45b3e', '#3968a8', '#ec4899', '#2ec46d', '#f59e0b', '#23273a'],
+  slimeRenk: ['#9b5de5', '#ec4899', '#58bce8', '#2ec46d', '#a8e6ff', '#f59e0b', '#f43f5e', '#22242a'],
+  simRengi: ['#ffe6a3', '#98f8ff', '#fff0a8', '#ffffff', '#ff9ee2', '#cdb4db', '#86efac'],
+  duvar: ['#cbbfb0', '#6c7086', '#cfbda8', '#b8c2cc', '#4a4e69', '#d8cfc4', '#2b3040'],
+  led: ['#3ce6e6', '#ff4da6', '#ffb84d', '#a86cf5', '#4ade80', '#fff1a8', '#60a5fa'],
+  masa: ['#93613c', '#583824', '#8c5832', '#785e4d', '#3e2f28', '#b07d56'],
+  tepsi: ['#bfb7c2', '#8c90a4', '#c8beb4', '#c2cad4', '#6c727f', '#e2e8f0'],
+};
+
+const SAC_MODELLERI = [
+  { id: 'topuz', ad: 'Topuz', svg: `<svg viewBox="0 0 44 40"><circle cx="22" cy="8.5" r="6.2" fill="currentColor"/><path d="M10 28C10 16.5 34 16.5 34 28" fill="currentColor"/><circle cx="22" cy="26.5" r="8.2" fill="#181b22"/></svg>` },
+  { id: 'atkuyrugu', ad: 'At kuyruğu', svg: `<svg viewBox="0 0 44 40"><path d="M30 16C37 17 39.5 25.5 36 33C32.5 29.5 32.5 23 29 21Z" fill="currentColor"/><path d="M10 26.5C10 15.5 32 15.5 32 26.5" fill="currentColor"/><circle cx="21" cy="25.5" r="8" fill="#181b22"/></svg>` },
+  { id: 'uzun', ad: 'Uzun düz', svg: `<svg viewBox="0 0 44 40"><path d="M9 24C9 12 35 12 35 24L36.5 36.5L29.5 36.5L29.5 24L14.5 24L14.5 36.5L7.5 36.5Z" fill="currentColor"/><circle cx="22" cy="24.5" r="7.8" fill="#181b22"/></svg>` },
+  { id: 'kut', ad: 'Kısa küt', svg: `<svg viewBox="0 0 44 40"><path d="M9 24.5C9 12.5 35 12.5 35 24.5C35 29.5 32.5 32 30 32L14 32C11.5 32 9 29.5 9 24.5Z" fill="currentColor"/><circle cx="22" cy="25" r="7.6" fill="#181b22"/></svg>` },
+  { id: 'kivircik', ad: 'Kıvırcık', svg: `<svg viewBox="0 0 44 40"><circle cx="13.5" cy="17.5" r="5.5" fill="currentColor"/><circle cx="22" cy="14" r="6" fill="currentColor"/><circle cx="30.5" cy="17.5" r="5.5" fill="currentColor"/><circle cx="10.5" cy="26" r="5.5" fill="currentColor"/><circle cx="33.5" cy="26" r="5.5" fill="currentColor"/><circle cx="22" cy="26" r="7.8" fill="#181b22"/></svg>` },
+];
+
+const KIYAFET_MODELLERI = [
+  { id: 'tisort', ad: 'Tişört', svg: `<svg viewBox="0 0 44 40"><path d="M15 8L6 13.5L9.5 19.5L14 17V33H30V17L34.5 19.5L38 13.5L29 8C27 10.8 24.8 12 22 12C19.2 12 17 10.8 15 8Z" fill="currentColor"/></svg>` },
+  { id: 'uzunkollu', ad: 'Uzun kollu', svg: `<svg viewBox="0 0 44 40"><path d="M15 8L5.5 14L4 31L9.5 32L12.5 18.5V33H31.5V18.5L34.5 32L40 31L38.5 14L29 8C27 10.6 24.8 11.8 22 11.8C19.2 11.8 17 10.6 15 8Z" fill="currentColor"/></svg>` },
+  { id: 'kapusonlu', ad: 'Kapüşonlu', svg: `<svg viewBox="0 0 44 40"><path d="M14 9C14 5.5 17.5 3.5 22 3.5C26.5 3.5 30 5.5 30 9L38.5 14.5L36.5 31L31.5 31V18.5V33.5H12.5V18.5V31L7.5 31L5.5 14.5L14 9Z" fill="currentColor"/><circle cx="22" cy="8.5" r="3.6" fill="#181b22"/><path d="M19.5 13.5V20M24.5 13.5V20" stroke="#181b22" stroke-width="1.6" stroke-linecap="round"/></svg>` },
+  { id: 'askili', ad: 'Askılı', svg: `<svg viewBox="0 0 44 40"><path d="M14 7H17.5V14.5C17.5 16.5 19.5 18 22 18C24.5 18 26.5 16.5 26.5 14.5V7H30V33.5H14V7Z" fill="currentColor"/></svg>` },
+  { id: 'gomlek', ad: 'Gömlek', svg: `<svg viewBox="0 0 44 40"><path d="M15 8L6.5 13.5L9.5 19.5L13.5 17.2V33.5H30.5V17.2L34.5 19.5L37.5 13.5L29 8L25.5 12.5L22 10.5L18.5 12.5L15 8Z" fill="currentColor"/><line x1="22" y1="11" x2="22" y2="33" stroke="#181b22" stroke-width="1.6"/><circle cx="22" cy="17" r="1.1" fill="#181b22"/><circle cx="22" cy="22" r="1.1" fill="#181b22"/><circle cx="22" cy="27" r="1.1" fill="#181b22"/></svg>` },
+  { id: 'kazak', ad: 'Kazak', svg: `<svg viewBox="0 0 44 40"><path d="M15.5 7.5H28.5L38.5 14L36.5 31.5L31.5 31.5V18.5V33.5H12.5V18.5V31.5L7.5 31.5L5.5 14L15.5 7.5Z" fill="currentColor"/><path d="M17.5 12V31M22 12V31M26.5 12V31" stroke="#181b22" stroke-width="1.5" stroke-dasharray="2.5 2.5" stroke-linecap="round"/></svg>` },
+  { id: 'salopet', ad: 'Salopet', svg: `<svg viewBox="0 0 44 40"><path d="M15 9L7 13.5L10 19L13.5 17V33.5H30.5V17L34 19L37 13.5L29 9C27 11 24.8 12 22 12C19.2 12 17 11 15 9Z" fill="currentColor" opacity="0.42"/><path d="M15.5 8.5H18.5V17.5H25.5V8.5H28.5V33.5H15.5V8.5Z" fill="currentColor"/><rect x="18.5" y="21" width="7" height="6" rx="1.2" fill="#181b22"/></svg>` },
+];
+
+const DESENLER = [
+  { id: 'duz', ad: 'Düz', svg: `<svg viewBox="0 0 40 34"><rect x="8" y="6" width="24" height="22" rx="4.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>` },
+  { id: 'yildiz', ad: 'Yıldız', svg: `<svg viewBox="0 0 40 34"><path d="M20 6.5L22.8 12.6L29.5 13.3L24.4 17.7L25.9 24.3L20 20.7L14.1 24.3L15.6 17.7L10.5 13.3L17.2 12.6Z" fill="currentColor"/></svg>` },
+  { id: 'cicek', ad: 'Çiçek', svg: `<svg viewBox="0 0 40 34"><circle cx="20" cy="10.5" r="3.6" fill="currentColor"/><circle cx="25.8" cy="15" r="3.6" fill="currentColor"/><circle cx="23.6" cy="21.8" r="3.6" fill="currentColor"/><circle cx="16.4" cy="21.8" r="3.6" fill="currentColor"/><circle cx="14.2" cy="15" r="3.6" fill="currentColor"/><circle cx="20" cy="16.8" r="2.6" fill="#181b22"/></svg>` },
+  { id: 'cizgili', ad: 'Çizgili', svg: `<svg viewBox="0 0 40 34"><line x1="8" y1="10" x2="32" y2="10" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/><line x1="8" y1="17" x2="32" y2="17" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/><line x1="8" y1="24" x2="32" y2="24" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></svg>` },
+  { id: 'puantiye', ad: 'Puantiye', svg: `<svg viewBox="0 0 40 34"><circle cx="13" cy="11" r="2.7" fill="currentColor"/><circle cx="27" cy="11" r="2.7" fill="currentColor"/><circle cx="20" cy="17" r="2.7" fill="currentColor"/><circle cx="13" cy="23" r="2.7" fill="currentColor"/><circle cx="27" cy="23" r="2.7" fill="currentColor"/></svg>` },
+];
+
+const BAS_AKSESUARLARI = [
+  { id: 'yok', ad: 'Yok', svg: `<svg viewBox="0 0 44 38"><circle cx="22" cy="19" r="10.5" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3"/><line x1="14.5" y1="11.5" x2="29.5" y2="26.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>` },
+  { id: 'kulaklik', ad: 'Kulaklık', svg: `<svg viewBox="0 0 44 38"><path d="M10 21V18.5C10 11.8 15.4 6.5 22 6.5C28.6 6.5 34 11.8 34 18.5V21" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><rect x="6.5" y="18.5" width="5.5" height="10.5" rx="2.6" fill="currentColor"/><rect x="32" y="18.5" width="5.5" height="10.5" rx="2.6" fill="currentColor"/></svg>` },
+  { id: 'bere', ad: 'Bere', svg: `<svg viewBox="0 0 44 38"><circle cx="22" cy="7.5" r="3" fill="currentColor"/><path d="M9.5 24C9.5 14.5 14.8 9.5 22 9.5C29.2 9.5 34.5 14.5 34.5 24Z" fill="currentColor"/><rect x="7.5" y="23" width="29" height="6" rx="3" fill="currentColor" stroke="#181b22" stroke-width="1.4"/></svg>` },
+  { id: 'kurdele', ad: 'Kurdele', svg: `<svg viewBox="0 0 44 38"><path d="M8.5 12.5C8.5 8.5 14.5 10.5 19.5 16.5C14.5 22.5 8.5 24.5 8.5 19.5Z" fill="currentColor"/><path d="M35.5 12.5C35.5 8.5 29.5 10.5 24.5 16.5C29.5 22.5 35.5 24.5 35.5 19.5Z" fill="currentColor"/><circle cx="22" cy="16.5" r="3.4" fill="currentColor"/><path d="M19.5 20L15 30M24.5 20L29 30" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>` },
+  { id: 'toka', ad: 'Toka', svg: `<svg viewBox="0 0 44 38"><rect x="10" y="14.5" width="24" height="8" rx="4" fill="currentColor"/><circle cx="16.5" cy="18.5" r="2" fill="#181b22"/><circle cx="22" cy="18.5" r="2" fill="#181b22"/><circle cx="27.5" cy="18.5" r="2" fill="#181b22"/></svg>` },
+];
+
+const CIL_SECENEKLERI = [
+  { id: false, ad: 'Yok', svg: `<svg viewBox="0 0 44 36"><path d="M10 22C13 15 31 15 34 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>` },
+  { id: true, ad: 'Çilli', svg: `<svg viewBox="0 0 44 36"><path d="M10 23C13 16 31 16 34 23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="14" cy="18" r="1.5" fill="currentColor"/><circle cx="17.5" cy="16.5" r="1.4" fill="currentColor"/><circle cx="16" cy="20" r="1.4" fill="currentColor"/><circle cx="26.5" cy="16.5" r="1.4" fill="currentColor"/><circle cx="30" cy="18" r="1.5" fill="currentColor"/><circle cx="28" cy="20" r="1.4" fill="currentColor"/></svg>` },
+];
+
+const KUPE_SECENEKLERI = [
+  { id: false, ad: 'Yok', svg: `<svg viewBox="0 0 44 36"><circle cx="22" cy="18" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="3 3"/><line x1="15.5" y1="11.5" x2="28.5" y2="24.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>` },
+  { id: true, ad: 'Takılı', svg: `<svg viewBox="0 0 44 36"><path d="M18 9C21 9 23 11.5 23 14.5C23 17 21 19 19 19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="19" cy="24" r="4.5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>` },
+];
+
+const GOZLUK_SECENEKLERI = [
+  { id: false, ad: 'Yok', svg: `<svg viewBox="0 0 44 36"><circle cx="22" cy="18" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="3 3"/><line x1="15.5" y1="11.5" x2="28.5" y2="24.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>` },
+  { id: true, ad: 'Gözlüklü', svg: `<svg viewBox="0 0 44 36"><rect x="6.5" y="12.5" width="13" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="2.1"/><rect x="24.5" y="12.5" width="13" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="2.1"/><line x1="19.5" y1="16.5" x2="24.5" y2="16.5" stroke="currentColor" stroke-width="2.1"/></svg>` },
+];
+
+const LED_SECENEKLERI = [
+  { id: true, ad: 'Açık', svg: `<svg viewBox="0 0 44 36"><path d="M6 12Q22 20 38 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="14.5" r="2.6" fill="currentColor"/><circle cx="22" cy="16" r="2.6" fill="currentColor"/><circle cx="32" cy="14.5" r="2.6" fill="currentColor"/></svg>` },
+  { id: false, ad: 'Kapalı', svg: `<svg viewBox="0 0 44 36"><path d="M6 12Q22 20 38 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="3 3" stroke-linecap="round"/><circle cx="12" cy="14.5" r="2.3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="22" cy="16" r="2.3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="32" cy="14.5" r="2.3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>` },
+];
+
+const ETIKET_SECENEKLERI = [
+  { id: true, ad: 'Etiketi göster', svg: `<svg viewBox="0 0 44 36"><rect x="7" y="10" width="30" height="15" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="13.5" cy="17.5" r="2.2" fill="currentColor"/><line x1="19" y1="17.5" x2="31.5" y2="17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>` },
+  { id: false, ad: 'Etiketi gizle', svg: `<svg viewBox="0 0 44 36"><rect x="7" y="10" width="30" height="15" rx="4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="3 3"/><line x1="11" y1="25" x2="33" y2="10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>` },
+];
+
+const VARSAYILAN_MOTORLAR = [
+  { id: 'tarayici', ad: 'Tarayıcı sesi', durum: 'hazir', not: 'Ücretsiz, kurulum yok.', sesler: [] },
+  { id: 'edge', ad: 'Edge TTS', durum: 'kurulu-degil', not: 'kurulum: README (pip install edge-tts)', sesler: [{ id: 'tr-TR-EmelNeural', ad: 'Emel (kadın)' }, { id: 'tr-TR-AhmetNeural', ad: 'Ahmet (erkek)' }] },
+  { id: 'voxcpm2', ad: 'VoxCPM2 Türkçe', durum: 'kurulu-degil', not: 'kurulum: README (yerel ses)', sesler: [] },
+  { id: 'elevenlabs', ad: 'ElevenLabs', durum: 'kurulu-degil', not: 'kurulum: README (ELEVENLABS_API_KEY)', sesler: [{ id: 'A2XgcJ6lQVEFeIaIUyrc', ad: 'Damla' }] },
+];
+
+const MAKS_GECMIS = 50;
+let KARAKTER = JSON.parse(JSON.stringify(HAZIR_KARAKTERLER.piksel));
+let MOTORLAR = JSON.parse(JSON.stringify(VARSAYILAN_MOTORLAR));
+let SUNUCU_VAR = false;
+let AKTIF_SEKME = 'hazir';
+let GECMIS = [];
+let ILERI_YIGIN = [];
+let KAYDEDILMIS_JSON = '';
+let sonKayitAnahtari = '';
+let sonKayitZamani = 0;
+let bildirimZamanlayici = null;
+
+function kopya(nesne) {
+  return JSON.parse(JSON.stringify(nesne));
+}
+
+function bildirimGoster(metin, oldu = true) {
+  const el = $('bildirimMetin');
+  if (!el) return;
+  el.textContent = metin;
+  el.className = 'bildirim' + (oldu ? ' oldu' : '');
+  clearTimeout(bildirimZamanlayici);
+  bildirimZamanlayici = setTimeout(() => {
+    el.textContent = 'Hazır';
+    el.className = 'bildirim';
+  }, 3200);
+}
+
+function gecerliRenk(s, yedek) {
+  return typeof s === 'string' && /^#[0-9a-fA-F]{6}$/.test(s.trim()) ? s.trim().toLowerCase() : yedek;
+}
+
+function karakterBirlestir(hedef, girdi) {
+  if (!girdi || typeof girdi !== 'object') return hedef;
+  if (typeof girdi.preset === 'string') hedef.preset = girdi.preset;
+  for (const bolum of ['kisi', 'kiyafet', 'slime', 'oda', 'yayin', 'ses']) {
+    if (girdi[bolum] && typeof girdi[bolum] === 'object') {
+      Object.assign(hedef[bolum], girdi[bolum]);
+    }
+  }
+  if (!hedef.kiyafet.model) hedef.kiyafet.model = 'tisort';
+  if (!hedef.kiyafet.ikinciRenk) hedef.kiyafet.ikinciRenk = '#d8b4e2';
+  if (!hedef.kiyafet.bas) hedef.kiyafet.bas = 'yok';
+  if (!hedef.kiyafet.basRengi) hedef.kiyafet.basRengi = '#9a6fd0';
+  return hedef;
+}
+
+function gecmiseKaydet(anahtar = '') {
+  const simdi = Date.now();
+  const mevcutStr = JSON.stringify(KARAKTER);
+  if (GECMIS.length && GECMIS[GECMIS.length - 1] === mevcutStr) return;
+  if (anahtar && anahtar === sonKayitAnahtari && (simdi - sonKayitZamani) < 420) {
+    ILERI_YIGIN = [];
+    sonKayitZamani = simdi;
+    gecmisDugmeleriGuncelle();
+    return;
+  }
+  GECMIS.push(mevcutStr);
+  if (GECMIS.length > MAKS_GECMIS) GECMIS.shift();
+  ILERI_YIGIN = [];
+  sonKayitAnahtari = anahtar;
+  sonKayitZamani = simdi;
+  gecmisDugmeleriGuncelle();
+}
+
+function gecmisDugmeleriGuncelle() {
+  const geriBtn = $('geriAlDugme');
+  const ileriBtn = $('ileriAlDugme');
+  if (geriBtn) geriBtn.disabled = GECMIS.length === 0;
+  if (ileriBtn) ileriBtn.disabled = ILERI_YIGIN.length === 0;
+  const degisti = KAYDEDILMIS_JSON !== '' && JSON.stringify(KARAKTER) !== KAYDEDILMIS_JSON;
+  const rozet = $('kaydedilmediRozet');
+  if (rozet) rozet.classList.toggle('gorunur', degisti);
+}
+
+function geriAl() {
+  if (!GECMIS.length) return;
+  ILERI_YIGIN.push(JSON.stringify(KARAKTER));
+  const onceki = JSON.parse(GECMIS.pop());
+  KARAKTER = karakterBirlestir(kopya(HAZIR_KARAKTERLER.piksel), onceki);
+  sonKayitAnahtari = '';
+  arayuzuGuncelle();
+  onizlemeyeGonder();
+  gecmisDugmeleriGuncelle();
+  bildirimGoster(`Geri alındı (${GECMIS.length} adım kaldı)`);
+}
+
+function ileriAl() {
+  if (!ILERI_YIGIN.length) return;
+  GECMIS.push(JSON.stringify(KARAKTER));
+  if (GECMIS.length > MAKS_GECMIS) GECMIS.shift();
+  const sonraki = JSON.parse(ILERI_YIGIN.pop());
+  KARAKTER = karakterBirlestir(kopya(HAZIR_KARAKTERLER.piksel), sonraki);
+  sonKayitAnahtari = '';
+  arayuzuGuncelle();
+  onizlemeyeGonder();
+  gecmisDugmeleriGuncelle();
+  bildirimGoster('İleri alındı');
+}
+
+function sekmeleriKur() {
+  const cubuk = $('sekmeCubugu');
+  cubuk.innerHTML = '';
+  for (const s of SEKMELER) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'sekme-dugme' + (s.id === AKTIF_SEKME ? ' secili' : '');
+    btn.dataset.sekme = s.id;
+    btn.innerHTML = `<span class="sekme-no">${s.no}</span>${s.svg}<span class="sekme-etiket">${s.etiket}</span>`;
+    btn.onclick = () => sekmeSec(s.id);
+    cubuk.append(btn);
+  }
+}
+
+function kameraOdakGuncelle(odak) {
+  const frame = $('onizlemeFrame');
+  if (!frame) return;
+  frame.classList.remove('odak-yuz', 'odak-govde', 'odak-tum');
+  frame.classList.add('odak-' + odak);
+  const etiketHarita = {
+    yuz: 'Kamera: Yüz yakın',
+    govde: 'Kamera: Gövde',
+    tum: 'Kamera: Tüm kare',
+  };
+  if ($('kameraDurum')) $('kameraDurum').textContent = etiketHarita[odak] || 'Kamera: Tüm kare';
+  if (frame.contentWindow) {
+    frame.contentWindow.postMessage({ tur: 'kamera', odak }, '*');
+  }
+}
+
+function sekmeSec(id) {
+  const hedef = SEKMELER.find((s) => s.id === id);
+  if (!hedef) return;
+  AKTIF_SEKME = id;
+  for (const b of document.querySelectorAll('.sekme-dugme')) {
+    b.classList.toggle('secili', b.dataset.sekme === id);
+  }
+  for (const bolum of document.querySelectorAll('.sekme-icerik')) {
+    bolum.classList.toggle('aktif', bolum.dataset.sekme === id);
+  }
+  $('kategoriBaslik').textContent = hedef.baslik;
+  $('kategoriAciklama').textContent = hedef.aciklama;
+  kameraOdakGuncelle(hedef.odak);
+}
+
+function miniPortreCiz(canvas, k) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width = 176, h = canvas.height = 208;
+  ctx.clearRect(0, 0, w, h);
+
+  ctx.fillStyle = k.oda.duvar;
+  ctx.fillRect(0, 0, w, h);
+  if (k.oda.ledAcik) {
+    ctx.strokeStyle = k.oda.led;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(10, 20);
+    ctx.quadraticCurveTo(w * 0.5, 32, w - 10, 18);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = k.kisi.sac;
+  if (k.kisi.sacModeli === 'topuz') {
+    ctx.beginPath(); ctx.arc(w * 0.5, 38, 22, 0, Math.PI * 2); ctx.fill();
+  } else if (k.kisi.sacModeli === 'atkuyrugu') {
+    ctx.beginPath(); ctx.ellipse(w * 0.74, 82, 19, 34, 0.35, 0, Math.PI * 2); ctx.fill();
+  } else if (k.kisi.sacModeli === 'uzun') {
+    ctx.beginPath(); ctx.roundRect(w * 0.23, 52, w * 0.54, 98, 20); ctx.fill();
+  } else if (k.kisi.sacModeli === 'kivircik') {
+    for (const [dx, dy, r] of [[-30, 62, 21], [30, 62, 21], [-34, 86, 21], [34, 86, 21], [0, 42, 25]]) {
+      ctx.beginPath(); ctx.arc(w * 0.5 + dx, dy, r, 0, Math.PI * 2); ctx.fill();
+    }
+  } else if (k.kisi.sacModeli === 'kut') {
+    ctx.beginPath(); ctx.roundRect(w * 0.24, 50, w * 0.52, 62, 20); ctx.fill();
+  }
+
+  ctx.fillStyle = k.kiyafet.ust;
+  ctx.beginPath();
+  ctx.moveTo(w * 0.18, h);
+  ctx.quadraticCurveTo(w * 0.22, 120, w * 0.50, 120);
+  ctx.quadraticCurveTo(w * 0.78, 120, w * 0.82, h);
+  ctx.closePath();
+  ctx.fill();
+
+  if (k.kiyafet.model === 'salopet' || k.kiyafet.model === 'kapusonlu' || k.kiyafet.model === 'gomlek') {
+    ctx.fillStyle = k.kiyafet.ikinciRenk || k.kiyafet.desenRengi;
+    ctx.fillRect(w * 0.36, 124, 8, 50);
+    ctx.fillRect(w * 0.64 - 8, 124, 8, 50);
+  }
+
+  if (k.kiyafet.desen !== 'duz') {
+    ctx.fillStyle = k.kiyafet.desenRengi;
+    for (const [px, py] of [[w * 0.40, 144], [w * 0.60, 144], [w * 0.50, 158]]) {
+      ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  ctx.fillStyle = k.kisi.ten;
+  ctx.fillRect(w * 0.44, 100, w * 0.12, 24);
+  ctx.beginPath();
+  ctx.ellipse(w * 0.5, 80, 30, 35, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = k.kisi.sac;
+  ctx.beginPath();
+  ctx.arc(w * 0.5, 71, 31, Math.PI * 1.05, Math.PI * 1.95);
+  ctx.fill();
+
+  if (k.kiyafet.bas === 'kulaklik') {
+    ctx.strokeStyle = k.kiyafet.basRengi || '#246ce6';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.arc(w * 0.5, 76, 34, Math.PI * 1.05, Math.PI * 1.95);
+    ctx.stroke();
+  } else if (k.kiyafet.bas === 'bere') {
+    ctx.fillStyle = k.kiyafet.basRengi || '#3968a8';
+    ctx.beginPath();
+    ctx.arc(w * 0.5, 62, 32, Math.PI, 0);
+    ctx.fill();
+  }
+
+  ctx.fillStyle = k.kisi.goz;
+  ctx.beginPath();
+  ctx.arc(w * 0.41, 81, 4.2, 0, Math.PI * 2);
+  ctx.arc(w * 0.59, 81, 4.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  if (k.kisi.gozluk) {
+    ctx.strokeStyle = '#2d313b';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(w * 0.33, 73, 23, 16);
+    ctx.strokeRect(w * 0.52, 73, 23, 16);
+  }
+
+  ctx.strokeStyle = k.kisi.dudak;
+  ctx.lineWidth = 3.2;
+  ctx.beginPath();
+  ctx.arc(w * 0.5, 94, 8, 0.15 * Math.PI, 0.85 * Math.PI);
+  ctx.stroke();
+
+  ctx.fillStyle = k.slime.renk;
+  ctx.globalAlpha = Math.max(0.55, k.slime.saydamlik);
+  ctx.beginPath();
+  ctx.ellipse(w * 0.5, h - 8, 48, 22, 0, Math.PI, 0);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+}
+
+function hazirKartlariKur() {
+  const kutu = $('hazirKartlar');
+  kutu.innerHTML = '';
+  for (const [id, p] of Object.entries(HAZIR_KARAKTERLER)) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'hazir-kart' + (KARAKTER.preset === id ? ' secili' : '');
+    btn.dataset.preset = id;
+    const c = document.createElement('img');
+    c.className = 'hazir-portre'; c.alt = p.ad; c.loading = 'lazy'; c.src = `assets/hazir/${id}.jpg`;
+    c.onerror = () => { const k = document.createElement('canvas'); miniPortreCiz(k, p); c.replaceWith(k); };
+    const metin = document.createElement('div');
+    metin.className = 'hazir-metin';
+    const rozetler = (p.etiketler || []).map((e) => `<em>${e}</em>`).join('');
+    metin.innerHTML = `<b>${p.ad}</b><span>${p.aciklama}</span><div class="hazir-etiketler">${rozetler}</div>`;
+    btn.innerHTML = TIK_SVG;
+    btn.prepend(c, metin);
+    btn.onclick = () => presetSec(id);
+    kutu.append(btn);
+  }
+}
+
+function renkPaletiKur(kapId, etiketId, paletAdi, bolum, alan) {
+  const kap = $(kapId);
+  if (!kap) return;
+  const seciliRenk = (KARAKTER[bolum][alan] || '').toLowerCase();
+  kap.innerHTML = '';
+  for (const hex of RENK_PALETLERI[paletAdi]) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ton-dugme' + (seciliRenk === hex.toLowerCase() ? ' secili' : '');
+    b.style.background = hex;
+    b.title = hex;
+    b.onclick = () => alanDegisti(bolum, alan, hex);
+    kap.append(b);
+  }
+  const serbest = document.createElement('label');
+  serbest.className = 'serbest-renk';
+  serbest.title = 'Özel renk seç';
+  const inp = document.createElement('input');
+  inp.type = 'color';
+  inp.value = gecerliRenk(seciliRenk, RENK_PALETLERI[paletAdi][0]);
+  inp.oninput = (e) => alanDegisti(bolum, alan, e.target.value, `${bolum}.${alan}`);
+  serbest.append(inp, document.createTextNode('Özel'));
+  kap.append(serbest);
+  if (etiketId && $(etiketId)) $(etiketId).textContent = seciliRenk;
+}
+
+function karoSecimKur(kapId, etiketId, liste, bolum, alan) {
+  const kap = $(kapId);
+  if (!kap) return;
+  const deger = KARAKTER[bolum][alan];
+  kap.innerHTML = '';
+  let aktifAd = '';
+  for (const oge of liste) {
+    const secili = deger === oge.id;
+    if (secili) aktifAd = oge.ad;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'secim-karo' + (secili ? ' secili' : '');
+    b.innerHTML = `${TIK_SVG}${oge.svg}<span class="karo-etiket">${oge.ad}</span>`;
+    b.onclick = () => alanDegisti(bolum, alan, oge.id);
+    kap.append(b);
+  }
+  if (etiketId && $(etiketId) && aktifAd) $(etiketId).textContent = aktifAd;
+}
+
+function tarayiciSesleriniAl() {
+  if (typeof speechSynthesis === 'undefined') return [];
+  const ham = speechSynthesis.getVoices() || [];
+  const sirali = [...ham].sort((a, b) => {
+    const aTr = /^tr/i.test(a.lang) ? 0 : 1;
+    const bTr = /^tr/i.test(b.lang) ? 0 : 1;
+    return aTr - bTr || a.name.localeCompare(b.name, 'tr');
+  });
+  return sirali.map((v) => ({ id: v.name, ad: `${v.name} (${v.lang})` }));
+}
+
+function sesBolumuGuncelle() {
+  const listeEl = $('motorListesi');
+  if (!listeEl) return;
+  listeEl.innerHTML = '';
+  const seciliMotorId = KARAKTER.ses.motor || 'tarayici';
+
+  for (const m of MOTORLAR) {
+    const hazir = m.durum === 'hazir';
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = `motor-kart ${hazir ? 'hazir' : 'kurulu-degil'}${seciliMotorId === m.id ? ' secili' : ''}`;
+    const durumEtiket = hazir ? 'Hazır' : 'kurulum: README';
+    const kisaNot = m.not || (hazir ? '' : 'kurulum: README');
+    b.innerHTML = `
+      <div class="motor-kart-ust">
+        <span>${m.ad}</span>
+        <span class="motor-durum">${durumEtiket}</span>
+      </div>
+      <div class="motor-not">${kisaNot}</div>
+    `;
+    b.onclick = () => {
+      gecmiseKaydet();
+      KARAKTER.ses.motor = m.id;
+      const sesler = m.id === 'tarayici' ? tarayiciSesleriniAl() : (m.sesler || []);
+      if (sesler.length && !sesler.some((s) => s.id === KARAKTER.ses.kimlik)) {
+        KARAKTER.ses.kimlik = sesler[0].id;
+      }
+      sesBolumuGuncelle();
+      gecmisDugmeleriGuncelle();
+      onizlemeyeGonder();
+    };
+    listeEl.append(b);
+  }
+
+  const sel = $('ayar-sesKimlik');
+  sel.innerHTML = '';
+  const aktifMotor = MOTORLAR.find((m) => m.id === seciliMotorId) || MOTORLAR[0];
+  let sesler = seciliMotorId === 'tarayici' ? tarayiciSesleriniAl() : (aktifMotor?.sesler || []);
+  if (!sesler.length) {
+    sesler = seciliMotorId === 'tarayici'
+      ? [{ id: 'tr-TR', ad: 'Türkçe (Tarayıcı varsayılanı)' }]
+      : [{ id: KARAKTER.ses.kimlik || 'varsayilan', ad: KARAKTER.ses.kimlik || 'Varsayılan ses' }];
+  }
+  for (const s of sesler) {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = s.ad;
+    if (s.id === KARAKTER.ses.kimlik) opt.selected = true;
+    sel.append(opt);
+  }
+  if (!sesler.some((s) => s.id === KARAKTER.ses.kimlik) && sesler[0]) {
+    KARAKTER.ses.kimlik = sesler[0].id;
+    sel.value = sesler[0].id;
+  }
+
+  $('ayar-hiz').value = KARAKTER.ses.hiz;
+  $('etiket-hiz').textContent = (+KARAKTER.ses.hiz).toFixed(2) + '×';
+  $('ayar-perde').value = KARAKTER.ses.perde;
+  $('etiket-perde').textContent = (+KARAKTER.ses.perde).toFixed(2) + '×';
+}
+
+function arayuzuGuncelle() {
+  for (const b of document.querySelectorAll('.hazir-kart')) {
+    b.classList.toggle('secili', b.dataset.preset === KARAKTER.preset);
+  }
+  const presetBilgi = HAZIR_KARAKTERLER[KARAKTER.preset];
+  $('aktifPresetEtiket').textContent = presetBilgi ? `Seçili: ${presetBilgi.ad}` : 'Özel kombinasyon';
+
+  renkPaletiKur('palet-ten', 'etiket-ten', 'ten', 'kisi', 'ten');
+  renkPaletiKur('palet-goz', 'etiket-goz', 'goz', 'kisi', 'goz');
+  renkPaletiKur('palet-dudak', 'etiket-dudak', 'dudak', 'kisi', 'dudak');
+  renkPaletiKur('palet-sac', 'etiket-sac', 'sac', 'kisi', 'sac');
+  renkPaletiKur('palet-ust', 'etiket-ust', 'ust', 'kiyafet', 'ust');
+  renkPaletiKur('palet-ikinciRenk', 'etiket-ikinciRenk', 'ikinciRenk', 'kiyafet', 'ikinciRenk');
+  renkPaletiKur('palet-desenRengi', 'etiket-desenRengi', 'desenRengi', 'kiyafet', 'desenRengi');
+  renkPaletiKur('palet-basRengi', 'etiket-basRengi', 'basRengi', 'kiyafet', 'basRengi');
+  renkPaletiKur('palet-slimeRenk', 'etiket-slimeRenk', 'slimeRenk', 'slime', 'renk');
+  renkPaletiKur('palet-simRengi', 'etiket-simRengi', 'simRengi', 'slime', 'simRengi');
+  renkPaletiKur('palet-duvar', 'etiket-duvar', 'duvar', 'oda', 'duvar');
+  renkPaletiKur('palet-led', 'etiket-led', 'led', 'oda', 'led');
+  renkPaletiKur('palet-masa', 'etiket-masa', 'masa', 'oda', 'masa');
+  renkPaletiKur('palet-tepsi', 'etiket-tepsi', 'tepsi', 'oda', 'tepsi');
+
+  karoSecimKur('secim-cil', 'etiket-cil', CIL_SECENEKLERI, 'kisi', 'cil');
+  karoSecimKur('secim-sacModeli', 'etiket-sacModeli', SAC_MODELLERI, 'kisi', 'sacModeli');
+  karoSecimKur('secim-kiyafetModel', 'etiket-kiyafetModel', KIYAFET_MODELLERI, 'kiyafet', 'model');
+  karoSecimKur('secim-desen', 'etiket-desen', DESENLER, 'kiyafet', 'desen');
+  karoSecimKur('secim-basAksesuar', 'etiket-basAksesuar', BAS_AKSESUARLARI, 'kiyafet', 'bas');
+  karoSecimKur('secim-kupe', 'etiket-kupe', KUPE_SECENEKLERI, 'kisi', 'kupe');
+  karoSecimKur('secim-gozluk', 'etiket-gozluk', GOZLUK_SECENEKLERI, 'kisi', 'gozluk');
+  karoSecimKur('secim-ledAcik', 'etiket-ledDurum', LED_SECENEKLERI, 'oda', 'ledAcik');
+  karoSecimKur('secim-etiketAcik', 'etiket-etiketAcik', ETIKET_SECENEKLERI, 'yayin', 'etiketAcik');
+
+  $('ayar-kas').value = KARAKTER.kisi.kasKalinligi;
+  $('etiket-kas').textContent = (+KARAKTER.kisi.kasKalinligi).toFixed(2) + '×';
+
+  $('ayar-saydamlik').value = KARAKTER.slime.saydamlik;
+  $('etiket-saydamlik').textContent = '%' + Math.round(KARAKTER.slime.saydamlik * 100);
+
+  if (document.activeElement !== $('ayar-isim')) $('ayar-isim').value = KARAKTER.yayin.isim || '';
+  if (document.activeElement !== $('ayar-etiket')) $('ayar-etiket').value = KARAKTER.yayin.etiket || '';
+
+  sesBolumuGuncelle();
+}
+
+function onizlemeyeGonder() {
+  const frame = $('onizlemeFrame');
+  if (frame && frame.contentWindow) {
+    frame.contentWindow.postMessage({ tur: 'karakter', ayar: KARAKTER }, '*');
+  }
+}
+
+function presetSec(id) {
+  const p = HAZIR_KARAKTERLER[id];
+  if (!p) return;
+  gecmiseKaydet();
+  const mevcutSes = { ...KARAKTER.ses };
+  KARAKTER = kopya(p);
+  KARAKTER.ses = { ...mevcutSes, ...p.ses };
+  arayuzuGuncelle();
+  gecmisDugmeleriGuncelle();
+  onizlemeyeGonder();
+  bildirimGoster(`${p.ad} karakteri yüklendi`);
+}
+
+function alanDegisti(bolum, alan, deger, birlestirAnahtari = '') {
+  if (KARAKTER[bolum][alan] === deger) return;
+  const surukleme = birlestirAnahtari || (typeof deger === 'number' || bolum === 'yayin' ? `${bolum}.${alan}` : '');
+  gecmiseKaydet(surukleme);
+  KARAKTER[bolum][alan] = deger;
+  if (bolum !== 'ses') KARAKTER.preset = 'ozel';
+  arayuzuGuncelle();
+  gecmisDugmeleriGuncelle();
+  onizlemeyeGonder();
+}
+
+function rastgeleEleman(dizi) {
+  return dizi[Math.floor(Math.random() * dizi.length)];
+}
+
+function kategoriRastgeleUygula(sekmeId) {
+  const isimler = ['Piksel', 'Gece', 'Defne', 'Mavi', 'Lila', 'Nova', 'Kumsal', 'Mercan', 'bulut.ai'];
+  if (sekmeId === 'hazir') {
+    const anahtarlar = Object.keys(HAZIR_KARAKTERLER).filter((k) => k !== KARAKTER.preset);
+    const secilen = rastgeleEleman(anahtarlar.length ? anahtarlar : Object.keys(HAZIR_KARAKTERLER));
+    const p = HAZIR_KARAKTERLER[secilen];
+    const mevcutSes = { ...KARAKTER.ses };
+    KARAKTER = kopya(p);
+    KARAKTER.ses = { ...mevcutSes, ...p.ses };
+    return `${p.ad} hazır karakteri seçildi`;
+  }
+  KARAKTER.preset = 'ozel';
+  if (sekmeId === 'yuz') {
+    KARAKTER.kisi.ten = rastgeleEleman(RENK_PALETLERI.ten);
+    KARAKTER.kisi.goz = rastgeleEleman(RENK_PALETLERI.goz);
+    KARAKTER.kisi.dudak = rastgeleEleman(RENK_PALETLERI.dudak);
+    KARAKTER.kisi.kasKalinligi = +(0.70 + Math.random() * 0.85).toFixed(2);
+    KARAKTER.kisi.cil = Math.random() < 0.45;
+    return 'Yüz özellikleri rastgele seçildi';
+  }
+  if (sekmeId === 'sac') {
+    KARAKTER.kisi.sacModeli = rastgeleEleman(SAC_MODELLERI).id;
+    KARAKTER.kisi.sac = rastgeleEleman(RENK_PALETLERI.sac);
+    return 'Saç modeli ve rengi rastgele seçildi';
+  }
+  if (sekmeId === 'kiyafet') {
+    KARAKTER.kiyafet.model = rastgeleEleman(KIYAFET_MODELLERI).id;
+    KARAKTER.kiyafet.ust = rastgeleEleman(RENK_PALETLERI.ust);
+    KARAKTER.kiyafet.ikinciRenk = rastgeleEleman(RENK_PALETLERI.ikinciRenk);
+    KARAKTER.kiyafet.desen = rastgeleEleman(DESENLER).id;
+    KARAKTER.kiyafet.desenRengi = rastgeleEleman(RENK_PALETLERI.desenRengi);
+    return 'Kıyafet kombinasyonu rastgele seçildi';
+  }
+  if (sekmeId === 'aksesuar') {
+    KARAKTER.kiyafet.bas = rastgeleEleman(BAS_AKSESUARLARI).id;
+    KARAKTER.kiyafet.basRengi = rastgeleEleman(RENK_PALETLERI.basRengi);
+    KARAKTER.kisi.kupe = Math.random() < 0.65;
+    KARAKTER.kisi.gozluk = Math.random() < 0.40;
+    return 'Aksesuarlar rastgele seçildi';
+  }
+  if (sekmeId === 'slime') {
+    KARAKTER.slime.renk = rastgeleEleman(RENK_PALETLERI.slimeRenk);
+    KARAKTER.slime.saydamlik = +(0.52 + Math.random() * 0.46).toFixed(2);
+    KARAKTER.slime.simRengi = rastgeleEleman(RENK_PALETLERI.simRengi);
+    return 'Slime görünümü rastgele seçildi';
+  }
+  if (sekmeId === 'oda') {
+    KARAKTER.oda.duvar = rastgeleEleman(RENK_PALETLERI.duvar);
+    KARAKTER.oda.led = rastgeleEleman(RENK_PALETLERI.led);
+    KARAKTER.oda.ledAcik = Math.random() < 0.85;
+    KARAKTER.oda.masa = rastgeleEleman(RENK_PALETLERI.masa);
+    KARAKTER.oda.tepsi = rastgeleEleman(RENK_PALETLERI.tepsi);
+    return 'Stüdyo ve oda renkleri rastgele seçildi';
+  }
+  if (sekmeId === 'ses') {
+    KARAKTER.ses.hiz = +(0.85 + Math.random() * 0.35).toFixed(2);
+    KARAKTER.ses.perde = +(0.85 + Math.random() * 0.30).toFixed(2);
+    return 'Ses hızı ve perdesi rastgele seçildi';
+  }
+  if (sekmeId === 'yayin') {
+    KARAKTER.yayin.isim = rastgeleEleman(isimler);
+    KARAKTER.yayin.etiketAcik = true;
+    return 'Yayıncı ismi rastgele seçildi';
+  }
+  return 'Rastgele seçildi';
+}
+
+function rastgeleKarakter(tumu = false) {
+  gecmiseKaydet();
+  if (tumu) {
+    for (const k of ['yuz', 'sac', 'kiyafet', 'aksesuar', 'slime', 'oda', 'yayin']) {
+      kategoriRastgeleUygula(k);
+    }
+    bildirimGoster('Tüm kategoriler rastgele oluşturuldu');
+  } else {
+    const mesaj = kategoriRastgeleUygula(AKTIF_SEKME);
+    bildirimGoster(mesaj);
+  }
+  arayuzuGuncelle();
+  gecmisDugmeleriGuncelle();
+  onizlemeyeGonder();
+}
+
+function rastgeleTiklandi(e) {
+  rastgeleKarakter(!!(e && e.shiftKey));
+}
+
+function sifirlaKarakter() {
+  presetSec('piksel');
+  bildirimGoster('Varsayılan Piksel karakterine sıfırlandı');
+}
+
+async function sunucuyaKaydet() {
+  onizlemeyeGonder();
+  try {
+    const r = await fetch('/karakter', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ ayar: KARAKTER }),
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    KAYDEDILMIS_JSON = JSON.stringify(KARAKTER);
+    gecmisDugmeleriGuncelle();
+    bildirimGoster('Karakter kaydedildi ve açık sahnelere gönderildi');
+  } catch {
+    bildirimGoster('Sunucu kapalı: yalnız canlı önizlemeye uygulandı', false);
+  }
+}
+
+function jsonIndir() {
+  const veri = JSON.stringify(KARAKTER, null, 2);
+  const blob = new Blob([veri], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const ad = (KARAKTER.yayin.isim || 'karakter').toLowerCase().replace(/[^a-z0-9ğüşıöç_-]+/gi, '-');
+  a.href = url;
+  a.download = `${ad}-karakter.json`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  bildirimGoster('Karakter JSON dosyası indirildi');
+}
+
+function jsonYukle(e) {
+  const dosya = e.target.files?.[0];
+  if (!dosya) return;
+  const okuyucu = new FileReader();
+  okuyucu.onload = () => {
+    try {
+      const cozulmus = JSON.parse(String(okuyucu.result || '{}'));
+      gecmiseKaydet();
+      karakterBirlestir(KARAKTER, cozulmus);
+      arayuzuGuncelle();
+      gecmisDugmeleriGuncelle();
+      onizlemeyeGonder();
+      bildirimGoster('JSON karakter dosyası yüklendi');
+    } catch {
+      bildirimGoster('Geçersiz JSON dosyası', false);
+    }
+    e.target.value = '';
+  };
+  okuyucu.readAsText(dosya);
+}
+
+function base64JsonKodla(nesne) {
+  const bytes = new TextEncoder().encode(JSON.stringify(nesne));
+  let bin = '';
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function base64JsonCoz(b64) {
+  try {
+    const temiz = String(b64).trim().replace(/-/g, '+').replace(/_/g, '/');
+    const pad = temiz.length % 4 ? temiz + '='.repeat(4 - (temiz.length % 4)) : temiz;
+    const bin = atob(pad);
+    const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+    return JSON.parse(new TextDecoder().decode(bytes));
+  } catch {
+    return null;
+  }
+}
+
+async function paylasimLinkiKopyala() {
+  const kod = base64JsonKodla(KARAKTER);
+  const hedef = new URL(location.href);
+  hedef.searchParams.set('karakter', kod);
+  const link = hedef.toString();
+  window.__sonPaylasimLinki = link;
+  try {
+    await navigator.clipboard.writeText(link);
+    bildirimGoster('Paylaşım bağlantısı panoya kopyalandı');
+  } catch {
+    bildirimGoster('Paylaşım bağlantısı hazırlandı');
+  }
+  return link;
+}
+
+async function aksiyonTetikle(ad) {
+  const frame = $('onizlemeFrame');
+  if (SUNUCU_VAR) {
+    try {
+      const r = await fetch('/aksiyon', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ ad }),
+      });
+      if (r.ok) return;
+    } catch {}
+  }
+  if (frame?.contentWindow) {
+    frame.contentWindow.postMessage({ tur: 'aksiyon', ad }, '*');
+  }
+}
+
+async function konustur() {
+  const girdi = $('konusturGirdi');
+  const metin = girdi.value.trim();
+  if (!metin) return;
+  girdi.value = '';
+  const frame = $('onizlemeFrame');
+  if (SUNUCU_VAR) {
+    try {
+      const r = await fetch('/soyle', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ metin }),
+      });
+      if (r.ok) {
+        bildirimGoster('Cümle sahneye gönderildi');
+        return;
+      }
+    } catch {}
+  }
+  if (frame?.contentWindow) {
+    frame.contentWindow.postMessage({
+      tur: 'konus',
+      id: 'menu-' + Date.now(),
+      metin,
+      tts: 'tarayici',
+      sesAyar: KARAKTER.ses,
+    }, '*');
+  }
+}
+
+async function ornekSesDinle() {
+  const ad = KARAKTER.yayin.isim || 'Piksel';
+  const ornek = `Merhaba, ben ${ad}. Bugün birlikte yumuşacık slime yoğuruyoruz.`;
+  const frame = $('onizlemeFrame');
+
+  if (KARAKTER.ses.motor !== 'tarayici' && SUNUCU_VAR) {
+    const motorBilgi = MOTORLAR.find((m) => m.id === KARAKTER.ses.motor);
+    if (motorBilgi && motorBilgi.durum === 'hazir') {
+      try {
+        await fetch('/karakter', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ ayar: KARAKTER }),
+        });
+        const r = await fetch('/soyle', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ metin: ornek }),
+        });
+        if (r.ok) {
+          bildirimGoster(`${motorBilgi.ad} ile örnek cümle okunuyor`);
+          return;
+        }
+      } catch {}
+    }
+  }
+
+  if (frame?.contentWindow) {
+    frame.contentWindow.postMessage({
+      tur: 'konus',
+      id: 'dinle-' + Date.now(),
+      metin: ornek,
+      tts: 'tarayici',
+      sesAyar: KARAKTER.ses,
+    }, '*');
+    bildirimGoster('Tarayıcı sesi ile örnek cümle okunuyor');
+  }
+}
+
+function klavyeDinle() {
+  window.addEventListener('keydown', (e) => {
+    const etiket = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+    const metinAlaninda = etiket === 'input' && (e.target.type === 'text' || e.target.type === 'search');
+
+    if ((e.metaKey || e.ctrlKey) && !metinAlaninda && e.key.toLowerCase() === 'z') {
+      e.preventDefault();
+      if (e.shiftKey) ileriAl();
+      else geriAl();
+      return;
+    }
+    if ((e.metaKey || e.ctrlKey) && !metinAlaninda && e.key.toLowerCase() === 'y') {
+      e.preventDefault();
+      ileriAl();
+      return;
+    }
+
+    if (metinAlaninda || etiket === 'select' || e.metaKey || e.ctrlKey || e.altKey) return;
+
+    if (e.key >= '1' && e.key <= '9') {
+      const idx = Number(e.key) - 1;
+      if (SEKMELER[idx]) {
+        e.preventDefault();
+        sekmeSec(SEKMELER[idx].id);
+      }
+      return;
+    }
+
+    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+      if (etiket === 'input' && e.target.type === 'range') return;
+      const aktifBolum = document.querySelector('.sekme-icerik.aktif');
+      if (!aktifBolum) return;
+      const odakGrup = e.target.closest('.karo-izgara, .renk-satir, .hazir-izgara, .motor-liste');
+      const kapsayici = odakGrup || aktifBolum.querySelector('.karo-izgara, .hazir-izgara, .renk-satir, .motor-liste');
+      if (!kapsayici) return;
+      const dugmeler = [...kapsayici.querySelectorAll('button:not(:disabled)')];
+      if (!dugmeler.length) return;
+      e.preventDefault();
+      let mevcutIdx = dugmeler.indexOf(document.activeElement);
+      if (mevcutIdx === -1) {
+        mevcutIdx = dugmeler.findIndex((b) => b.classList.contains('secili'));
+        if (mevcutIdx === -1) mevcutIdx = 0;
+      }
+      const ileri = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1 : -1;
+      const yeniIdx = (mevcutIdx + ileri + dugmeler.length) % dugmeler.length;
+      dugmeler[yeniIdx].focus();
+      dugmeler[yeniIdx].click();
+    }
+  });
+}
+
+async function baslangicYukle() {
+  sekmeleriKur();
+  hazirKartlariKur();
+  arayuzuGuncelle();
+  klavyeDinle();
+
+  const frame = $('onizlemeFrame');
+  frame.addEventListener('load', () => {
+    onizlemeyeGonder();
+    const aktif = SEKMELER.find((s) => s.id === AKTIF_SEKME);
+    if (aktif) kameraOdakGuncelle(aktif.odak);
+    $('sahneDurum').textContent = 'Canlı · 60 FPS';
+  });
+
+  if (typeof speechSynthesis !== 'undefined' && 'onvoiceschanged' in speechSynthesis) {
+    speechSynthesis.onvoiceschanged = () => sesBolumuGuncelle();
+  }
+
+  if (location.protocol !== 'file:') {
+    const [resKar, resSes] = await Promise.allSettled([
+      fetch('/karakter.json').then((r) => (r.ok ? r.json() : null)),
+      fetch('/sesler').then((r) => (r.ok ? r.json() : null)),
+    ]);
+
+    if (resKar.status === 'fulfilled' && resKar.value) {
+      SUNUCU_VAR = true;
+      if (typeof resKar.value === 'object' && Object.keys(resKar.value).length) {
+        karakterBirlestir(KARAKTER, resKar.value);
+      }
+    }
+    if (resSes.status === 'fulfilled' && resSes.value) {
+      SUNUCU_VAR = true;
+      const j = resSes.value;
+      if (Array.isArray(j.motorlar) && j.motorlar.length) MOTORLAR = j.motorlar;
+      if (j.secili && typeof j.secili === 'object') Object.assign(KARAKTER.ses, j.secili);
+    }
+  }
+
+  const urlKar = new URLSearchParams(location.search).get('karakter');
+  if (urlKar) {
+    const cozulmus = base64JsonCoz(urlKar);
+    if (cozulmus) karakterBirlestir(KARAKTER, cozulmus);
+  }
+
+  if (!SUNUCU_VAR) {
+    $('kaydetDugme').disabled = true;
+    $('kaydetDugme').title = 'Sunucu çalışmıyor';
+  }
+
+  KAYDEDILMIS_JSON = JSON.stringify(KARAKTER);
+  GECMIS = [];
+  ILERI_YIGIN = [];
+  arayuzuGuncelle();
+  gecmisDugmeleriGuncelle();
+  frame.src = 'sahne.html?onizleme=1';
+}
+
+baslangicYukle();
+</script>
+</body>
+</html>
