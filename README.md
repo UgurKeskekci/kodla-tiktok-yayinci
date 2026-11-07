@@ -54,9 +54,9 @@ npm start
 | [VoxCPM2 Türkçe ses tasarımı](https://github.com/alexturkey/voxcpm2-turkce-ses-tasarimi) | ücretsiz, yerel | o reponun kurulumu | Sesi tarifle tasarlarsınız; yavaş, canlı sohbetten çok hazır cümleler için. |
 | [ElevenLabs](https://elevenlabs.io) | ücretli | `ELEVENLABS_API_KEY` | En doğal ses, ~0,7 sn. |
 
-**Piksel'in kendi sesi repoda:** `sesler/piksel/` VoxCPM2 ile İngilizce bir tariften tasarlandı (yirmili yaşlarda, samimi
-bir yayıncı; ses gerçek bir kişiye ait değil, yapay). VoxCPM2 kuruluysa menüdeki Ses bölümünde "piksel (bu repodan)"
-olarak çıkar, ücretsiz ve tamamen yerel çalışır. Tanıtım videosundaki ses de bu. VoxCPM2'nin bulunması için yolunu
+**Karakterlerin kendi sesleri repoda:** `sesler/` altında Piksel, Gece, Defne ve Mavi'nin sesleri VoxCPM2 ile İngilizce
+tariflerden tasarlandı (sesler gerçek kişilere ait değil, yapay). VoxCPM2 kuruluysa menüdeki Ses bölümünde "piksel (bu repodan)"
+ve diğerleri olarak çıkar, ücretsiz ve tamamen yerel çalışır. Tanıtım videosundaki sesler de bunlar. VoxCPM2'nin bulunması için yolunu
 `ayarlar.json` içine ya da `VOXCPM2_DIR` ortam değişkenine yazın (`ayarlar.ornek.json`'a bakın). Ağız hareketi sesin
 şiddetinden anlık hesaplanır; tarayıcı sesinde hece ritminden.
 
@@ -102,7 +102,7 @@ Bu karakter tek bir prompt ile çıkmadı. İş akışı adım adım: [docs/is-a
 | `sesler.mjs` | Ses motorları. |
 | `beyin.mjs`, `kisilik.md` | Yorumlara cevap ve karakterin kişiliği. |
 | `assets/` | CC0 slime ve su sesleri, hazır karakter portreleri. |
-| `sesler/piksel/` | Piksel'in VoxCPM2 sesi (yapay, tariften tasarlandı). |
+| `sesler/` | Piksel, Gece, Defne ve Mavi'nin VoxCPM2 sesleri (yapay, tariften tasarlandı). |
 | `araclar/` | `denetim.mjs`: her hareketi oynatıp ani sıçramaları yakalar. `portreler.mjs`: hazır karakter portreleri. |
 
 ## Teşekkür ve lisanslar

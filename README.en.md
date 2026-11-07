@@ -52,7 +52,7 @@ The menu, the sample voices and the character's replies are in Turkish; the syst
 | [VoxCPM2 Turkish voice design](https://github.com/alexturkey/voxcpm2-turkce-ses-tasarimi) | free, local | see that repo's setup | Design a voice from a text prompt; slow, better suited for preset lines than live chat. |
 | [ElevenLabs](https://elevenlabs.io) | paid | `ELEVENLABS_API_KEY` | Most natural voice, ~0.7s latency. |
 
-**Piksel's own voice is included in the repo:** `sesler/piksel/` was designed with VoxCPM2 from an English prompt (a friendly streamer in her twenties; the voice is synthetic and does not belong to a real person). If VoxCPM2 is installed, it appears in the Voice section of the menu as `piksel (bu repodan)`, runs locally, and is free. This is also the voice in the promo video. For the server to find VoxCPM2, set its path in `ayarlar.json` or via the `VOXCPM2_DIR` environment variable (see `ayarlar.ornek.json`). Lip sync is computed in real time from audio amplitude, or from syllable rhythm when using the browser voice.
+**The characters' own voices ship with the repo:** under `sesler/`, the voices of Piksel, Gece, Defne and Mavi were designed with VoxCPM2 from English descriptions (synthetic, not real people). If VoxCPM2 is installed, they show up in the Voice section of the menu as "piksel (bu repodan)" and so on, free and fully local. To let the server find VoxCPM2, put its path in `ayarlar.json` or the `VOXCPM2_DIR` environment variable (see `ayarlar.ornek.json`). The mouth follows the loudness of the audio in real time; with the browser voice it follows the syllable rhythm.
 
 Other free Turkish voices: [Ahenk](https://github.com/ozguradmin/ahenk-turkish-tts) (Özgür Güler; question intonation, emotion, laughter; weights are CC BY 4.0, credit Ahenk if you use it) and [EMA Lightning](https://huggingface.co/canberkkkkkk/ema-lightning) (Canberk Aslan, Apache 2.0, runs on CPU).
 
@@ -90,7 +90,7 @@ This character did not come out of a single prompt. For the step-by-step workflo
 | `sesler.mjs` | Voice engines. |
 | `beyin.mjs`, `kisilik.md` | Comment replies and character persona. |
 | `assets/` | CC0 slime and water sound effects, preset character portraits. |
-| `sesler/piksel/` | Piksel's VoxCPM2 voice (synthetic, designed from a text prompt). |
+| `sesler/` | VoxCPM2 voices of Piksel, Gece, Defne and Mavi (synthetic, designed from text prompts). |
 | `araclar/` | `denetim.mjs`: plays every animation and catches sudden frame jumps. `portreler.mjs`: generates preset character portraits. |
 
 ## Credits and licenses

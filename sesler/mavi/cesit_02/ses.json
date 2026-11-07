@@ -1,0 +1,18 @@
+{
+  "ad": "mavi",
+  "gorunen_ad": "mavi",
+  "cesit": 2,
+  "dil": "tr",
+  "ses_yaratici_ingilizce_prompt": "Young woman in her early twenties, witty nerdy streamer, crisp clear voice, slightly higher pitch, cheerful and curious, fast natural pace",
+  "ses_yaratilirken_okutulan_metin": "Selam! Ben de kodla çizildim, inanmıyorsan bak.",
+  "tasarim_tohumu": 2338731920,
+  "okuma_tohumu": 2338731920,
+  "referans": "referans.wav",
+  "referans_sn": 3.7,
+  "model": "voxcpm2-q8_0.gguf",
+  "adim": 16,
+  "cfg": 2.0,
+  "yapay": true,
+  "tarih": "2026-11-07 22:59",
+  "not": "referans kesildi: sondaki artik okumalara siziyordu"
+}
